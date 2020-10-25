@@ -27,7 +27,13 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
 	// Handle possible shipping fee
 	var price = response.price.trim();
 	var shippingFee = response.shipping.trim();
-	var shippingFee = shippingFee.substring(shippingFee.indexOf("$") + 1, shippingFee.indexOf("Shipping") - 1);
+	
+	// Handle products that cannot be shipped
+	if (shippingFee.includes("$")){
+	   shippingFee = shippingFee.substring(shippingFee.indexOf("$") + 1, shippingFee.indexOf("Shipping") - 1);
+	} else {
+	   shippingFee = "0.00";
+	}
 	var totalAmt = parseFloat(price.substring(1, price.length)) + parseFloat(shippingFee);
 	//console.log("total amount: " + totalAmt);
 	//document.getElementById('current-price-card1').setAttribute(innerHTML, totalAmt.toPrecision(4));
