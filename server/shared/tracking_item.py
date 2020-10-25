@@ -9,6 +9,10 @@ class TrackingItem:
         self.sampleFrequency = sampleFrequency
         self.priceHistory = priceHistory
 
+    SAMPLE_HOUR = 1
+    SAMPLE_DAY = 2
+    SAMPLE_WEEK = 3
+
     @classmethod
     def fromDBRecord(cls, id, url, imgUrl, title, priceThreshold, timeThreshold, sampleFrequency):
         return TrackingItem(id, url, imgUrl, title, priceThreshold, timeThreshold, sampleFrequency, [])

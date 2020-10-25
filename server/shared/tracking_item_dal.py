@@ -41,12 +41,12 @@ def cursor_read_tracking_items_with_price(cursor):
     for row in cursor:
         #can't figure out string reading here
         if row[0] != current_id:
-            current_item = TrackingItem.fromDBRecord(row[0], row[1], row[2], row[3], row[4], row[5], 0)
+            current_item = TrackingItem.fromDBRecord(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
             current_id = row[0]
             outVals.append(current_item)
 
-        if row[6] is not None:
-            current_item.priceHistory.append(LoggedPrice(row[6], row[7], row[8]))
+        if row[7] is not None:
+            current_item.priceHistory.append(LoggedPrice(row[7], row[8], row[9]))
     
     return outVals
 
@@ -62,7 +62,7 @@ def cursor_read_similar_items(cursor):
 def cursor_read_tracking_items(cursor):
     outVals = []
     for row in cursor:
-        current_item = TrackingItem.fromDBRecord(row[0], row[1], row[2], row[3], row[4], row[5], 0)
+        current_item = TrackingItem.fromDBRecord(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
         outVals.append(current_item)
     
     return outVals
@@ -146,12 +146,13 @@ class TrackingItemDAL:
 
         USER_ITEM_SQL = """
         INSERT INTO user_trackingitem
-            (itemId, userId, notifyDate, notifyPrice, sortOrder)
+            (itemId, userId, notifyDate, notifyPrice, sampleFrequency, sortOrder)
         VALUES
             (%(itemid)s, 
             %(userid)s, 
             %(notifyDate)s, 
-            %(notifyPrice)s, 
+            %(notifyPrice)s,
+            %(sampleFrequency)s,
             (SELECT 1 + COALESCE(MAX(sortOrder), 0) FROM user_trackingitem WHERE userId = %(userid)s) 
             )
         ON CONFLICT DO NOTHING
@@ -162,6 +163,7 @@ class TrackingItemDAL:
             "userid":userid,
             "notifyDate":item.timeThreshold,
             "notifyPrice":item.priceThreshold,
+            "sampleFrequency":item.sampleFrequency
         }
 
         return self.run_sql(USER_ITEM_SQL, USER_ITEM_PARAMS)
@@ -189,7 +191,8 @@ class TrackingItemDAL:
         UPDATE_ITEM_SQL = """
         UPDATE user_trackingitem 
         SET notifyDate = %(notifyDate)s,
-            notifyPrice = %(notifyPrice)s
+            notifyPrice = %(notifyPrice)s,
+            sampleFrequency = %(sampleFrequency)s
         WHERE itemId = %(itemId)s AND userId = %(userId)s
         """
 
@@ -197,7 +200,8 @@ class TrackingItemDAL:
             "notifyDate": item.timeThreshold,
             "notifyPrice": item.priceThreshold,
             "itemId": item.id,
-            "userId": userId
+            "userId": userId,
+            "sampleFrequency": item.sampleFrequency
         }
 
         return self.run_sql(UPDATE_ITEM_SQL, UPDATE_ITEM_PARAMS)
@@ -224,7 +228,7 @@ class TrackingItemDAL:
         userId = self.userForEmail(userEmail)
 
         ITEM_SQL = """
-        SELECT i.id, i.url, i.imgurl, i.title, ui.notifyPrice, ui.notifyDate
+        SELECT i.id, i.url, i.imgurl, i.title, ui.notifyPrice, ui.notifyDate, ui.sampleFrequency
         FROM trackingitem i
         INNER JOIN user_trackingitem ui
         ON i.id = ui.itemId
@@ -250,7 +254,7 @@ class TrackingItemDAL:
         userId = self.userForEmail(userEmail)
 
         ITEM_SQL = """
-        SELECT i.id, i.url, i.imgurl, i.title, ui.notifyPrice, ui.notifyDate, l.logDate, l.price, l.primePrice
+        SELECT i.id, i.url, i.imgurl, i.title, ui.notifyPrice, ui.notifyDate, ui.sampleFrequency, l.logDate, l.price, l.primePrice
         FROM trackingitem i
         INNER JOIN user_trackingitem ui
         ON i.id = ui.itemId
@@ -380,7 +384,22 @@ class TrackingItemDAL:
         return self.run_sql(PRIME_SQL, PRIME_PARAMS, cursor_readscalar)
 
 
-    def itemsToScrape(self):
-        pass
+    def itemsToScrape(self, date=datetime.now()):
+        SCRAPE_SQL = """
+        SELECT i.id, i.url
+        FROM trackingitem i
+        WHERE (SELECT MIN(ui.sampleFrequency) FROM user_trackingitem ui WHERE ui.itemId = i.id) 
+            <= CASE 
+            WHEN extract(dow from %(nowDate)s) = 0 AND extract(hour from %(nowDate)s) = 0 THEN 3 
+            WHEN extract(hour from %(nowDate)s) = 0 THEN 2 
+            ELSE 1 END
+        ORDER BY i.id
+        """
+
+        SCRAPE_PARAMS = {
+            "nowDate": date
+        }
+
+        return self.run_sql(SCRAPE_SQL, SCRAPE_PARAMS, cursor_read_scrape_tuples)
 
      

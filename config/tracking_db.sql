@@ -154,6 +154,7 @@ CREATE TABLE public.user_trackingitem (
     userid integer NOT NULL,
     notifydate timestamp without time zone,
     notifyprice numeric(12,2),
+    samplefrequency integer,
     sortorder integer
 );
 
@@ -204,7 +205,7 @@ COPY public.user_similar_item (similarid, userid) FROM stdin;
 -- Data for Name: user_trackingitem; Type: TABLE DATA; Schema: public; Owner: webappuser
 --
 
-COPY public.user_trackingitem (itemid, userid, notifydate, notifyprice, sortorder) FROM stdin;
+COPY public.user_trackingitem (itemid, userid, notifydate, notifyprice, samplefrequency, sortorder) FROM stdin;
 \.
 
 
@@ -309,14 +310,6 @@ ALTER TABLE ONLY public.pricelog
 
 
 --
--- Name: user_trackingitem fk_item; Type: FK CONSTRAINT; Schema: public; Owner: webappuser
---
-
-ALTER TABLE ONLY public.user_trackingitem
-    ADD CONSTRAINT fk_item FOREIGN KEY (itemid) REFERENCES public.trackingitem(id) ON DELETE CASCADE;
-
-
---
 -- Name: user_similar_item fk_item; Type: FK CONSTRAINT; Schema: public; Owner: webappuser
 --
 
@@ -325,11 +318,11 @@ ALTER TABLE ONLY public.user_similar_item
 
 
 --
--- Name: user_trackingitem fk_user; Type: FK CONSTRAINT; Schema: public; Owner: webappuser
+-- Name: user_trackingitem fk_item; Type: FK CONSTRAINT; Schema: public; Owner: webappuser
 --
 
 ALTER TABLE ONLY public.user_trackingitem
-    ADD CONSTRAINT fk_user FOREIGN KEY (userid) REFERENCES public.trackinguser(id) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_item FOREIGN KEY (itemid) REFERENCES public.trackingitem(id) ON DELETE CASCADE;
 
 
 --
@@ -337,6 +330,14 @@ ALTER TABLE ONLY public.user_trackingitem
 --
 
 ALTER TABLE ONLY public.user_similar_item
+    ADD CONSTRAINT fk_user FOREIGN KEY (userid) REFERENCES public.trackinguser(id) ON DELETE CASCADE;
+
+
+--
+-- Name: user_trackingitem fk_user; Type: FK CONSTRAINT; Schema: public; Owner: webappuser
+--
+
+ALTER TABLE ONLY public.user_trackingitem
     ADD CONSTRAINT fk_user FOREIGN KEY (userid) REFERENCES public.trackinguser(id) ON DELETE CASCADE;
 
 
