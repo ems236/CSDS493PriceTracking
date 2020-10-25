@@ -113,7 +113,7 @@ ALTER TABLE public.trackingitem ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY
 CREATE TABLE public.trackinguser (
     id integer NOT NULL,
     useremail character varying(100),
-    hasprime bit(1)
+    hasprime boolean
 );
 
 
@@ -293,18 +293,26 @@ ALTER TABLE ONLY public.user_trackingitem
 
 
 --
--- Name: user_trackingitem fk_item; Type: FK CONSTRAINT; Schema: public; Owner: webappuser
---
-
-ALTER TABLE ONLY public.user_trackingitem
-    ADD CONSTRAINT fk_item FOREIGN KEY (itemid) REFERENCES public.trackingitem(id) ON DELETE CASCADE;
-
-
---
 -- Name: similaritem fk_item; Type: FK CONSTRAINT; Schema: public; Owner: webappuser
 --
 
 ALTER TABLE ONLY public.similaritem
+    ADD CONSTRAINT fk_item FOREIGN KEY (itemid) REFERENCES public.trackingitem(id) ON DELETE CASCADE;
+
+
+--
+-- Name: pricelog fk_item; Type: FK CONSTRAINT; Schema: public; Owner: webappuser
+--
+
+ALTER TABLE ONLY public.pricelog
+    ADD CONSTRAINT fk_item FOREIGN KEY (itemid) REFERENCES public.trackingitem(id) ON DELETE CASCADE;
+
+
+--
+-- Name: user_trackingitem fk_item; Type: FK CONSTRAINT; Schema: public; Owner: webappuser
+--
+
+ALTER TABLE ONLY public.user_trackingitem
     ADD CONSTRAINT fk_item FOREIGN KEY (itemid) REFERENCES public.trackingitem(id) ON DELETE CASCADE;
 
 
@@ -314,14 +322,6 @@ ALTER TABLE ONLY public.similaritem
 
 ALTER TABLE ONLY public.user_similar_items
     ADD CONSTRAINT fk_item FOREIGN KEY (similarid) REFERENCES public.similaritem(id) ON DELETE CASCADE;
-
-
---
--- Name: pricelog fk_item; Type: FK CONSTRAINT; Schema: public; Owner: webappuser
---
-
-ALTER TABLE ONLY public.pricelog
-    ADD CONSTRAINT fk_item FOREIGN KEY (itemid) REFERENCES public.trackingitem(id) ON DELETE CASCADE;
 
 
 --
