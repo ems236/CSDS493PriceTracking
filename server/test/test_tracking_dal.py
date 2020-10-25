@@ -1,5 +1,5 @@
 import pytest
-
+#pytest --cov=server/shared --pdb
 from server.shared.tracking_item_dal import *
 
 def test_production_conn():
@@ -14,7 +14,7 @@ INITIAL_USERS = [
 
 TEST_ITEM = TrackingItem.fromDBRecord(1, "testurl", "imgurl", "myitem", Decimal('1.25'), datetime.now(), 0)
 TEST_ITEM2 = TrackingItem.fromDBRecord(2, "testurl.com", "imgurl.png", "myitem2", Decimal('1.2'), datetime.now(), 0)
-TEST_ITEM2 = TrackingItem.fromDBRecord(3, "testurl.biz", "imgurl.jpg", "myitem3", Decimal('1.29'), datetime.now(), 0)
+TEST_ITEM3 = TrackingItem.fromDBRecord(3, "testurl.biz", "imgurl.jpg", "myitem3", Decimal('1.29'), datetime.now(), 0)
 
 
 TABLES = ["pricelog", "similaritem", "trackingitem", "trackinguser", "user_similar_item", "user_trackingitem"]
@@ -53,7 +53,7 @@ def test_user_lookup(debugDal):
     assert debugDal.userForEmail("ellis.saupe2@gmail.com") == 3
     assert count(debugDal, "trackinguser") == 3
 
-def test_item(debugDal):
+def test_single_item(debugDal):
     wipeDB(debugDal)
 
     test_email = INITIAL_USERS[0]["user"]
@@ -80,6 +80,31 @@ def test_item(debugDal):
     assert count(debugDal, "user_trackingitem") == 0
     items = debugDal.userItems(test_email)
     assert len(items) == 0
+
+def test_many_item(debugDal):
+    wipeDB(debugDal)
+
+    test_email = INITIAL_USERS[0]["user"]
+
+    assert count(debugDal, "trackingitem") == 0
+    assert count(debugDal, "user_trackingitem") == 0
+    debugDal.createItem(TEST_ITEM, test_email)
+    assert debugDal.deleteItem(TEST_ITEM.id, test_email)
+    #the item doesn't get deleted, just the fact that the user is tracking it
+    assert count(debugDal, "trackingitem") == 1
+    assert count(debugDal, "user_trackingitem") == 0
+    
+    debugDal.createItem(TEST_ITEM, test_email)
+    debugDal.createItem(TEST_ITEM2, test_email)
+    debugDal.createItem(TEST_ITEM3, test_email)
+    assert count(debugDal, "trackingitem") == 3
+    assert count(debugDal, "user_trackingitem") == 3
+
+    items = debugDal.userItems(test_email)
+    assert len(items) == 3
+    assert items[0] == TEST_ITEM
+    assert items[1] == TEST_ITEM2
+    assert items[2] == TEST_ITEM3
 
 
 def test_log_price(debugDal):

@@ -111,8 +111,20 @@ class TrackingItemDAL:
         return self.run_sql(USER_CREATE_SQL, USER_PARAMS, cursor_readscalar)
 
 
-    def createItem(self, item: TrackingItem, userEmail: str):
-        ITEM_SQL = """
+    def idForItem(self, item: TrackingItem):
+        ITEM_EXISTS_SQL = """
+        SELECT id
+        FROM trackingitem
+        WHERE url = %(url)s 
+        """
+
+        ITEM_PARAMS = {"url": item.url}
+        id = self.run_sql(ITEM_EXISTS_SQL, ITEM_PARAMS, cursor_readscalar_if_exists)
+
+        if id is not None:
+            return id
+        
+        ITEM_CREATE_SQL = """
         INSERT INTO trackingitem 
             (url, title, imgurl)
         VALUES
@@ -120,13 +132,16 @@ class TrackingItemDAL:
         RETURNING
             id
         """
-        ITEM_PARAMS = {
+        ITEM_CREATE_PARAMS = {
             "url": item.url,
             "title": item.title,
             "imgurl": item.imgUrl
             }
-        
-        itemid = self.run_sql(ITEM_SQL, ITEM_PARAMS, cursor_readscalar)
+        return self.run_sql(ITEM_CREATE_SQL, ITEM_CREATE_PARAMS, cursor_readscalar)
+
+
+    def createItem(self, item: TrackingItem, userEmail: str):
+        itemid = self.idForItem(item)
         userid = self.userForEmail(userEmail)
 
         USER_ITEM_SQL = """
@@ -137,7 +152,7 @@ class TrackingItemDAL:
             %(userid)s, 
             %(notifyDate)s, 
             %(notifyPrice)s, 
-            (SELECT 1 + MAX(sortOrder) FROM user_trackingitem WHERE userId = %(userid)s) 
+            (SELECT 1 + COALESCE(MAX(sortOrder), 0) FROM user_trackingitem WHERE userId = %(userid)s) 
             )
         """
 
@@ -224,7 +239,8 @@ class TrackingItemDAL:
                 WHERE
                     l.itemId = i.id
                     AND l.logDate = (SELECT MAX(ll.logDate) FROM pricelog ll WHERE ll.itemId = i.id)
-            LIMIT 1) 
+            LIMIT 1)
+        ORDER BY i.id
         """
 
         ITEM_PARAMS = {"userId": userId}
