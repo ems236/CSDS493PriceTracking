@@ -1,5 +1,5 @@
 import pytest
-#pytest --cov=server/shared --pdb
+#pytest --cov-report term-missing --cov=server/shared --pdb
 from server.shared.tracking_item_dal import *
 
 def test_production_conn():
@@ -7,14 +7,24 @@ def test_production_conn():
     one = prod_dal.run_sql("SELECT 1", {}, cursor_readscalar)
     assert one == 1
 
+#compare eq for that coverage
+def test_bad_eq():
+    x = TrackingItem.fromFrontEnd("testurl", "imgurl", "myitem", Decimal('1.25'), datetime.now(), TrackingItem.SAMPLE_DAY)
+    y = SimilarItem("a", 1, "none", "b")
+    z = LoggedPrice(datetime.now(), Decimal('1'), Decimal('2'))
+
+    assert not x == y
+    assert not y == x
+    assert not z == x
+
 INITIAL_USERS = [
         {"user":"ems236@case.edu"}
         , {"user":"ellis.saupe@gmail.com"}
     ]
 
-TEST_ITEM = TrackingItem.fromDBRecord(1, "testurl", "imgurl", "myitem", Decimal('1.25'), datetime.now(), 0)
-TEST_ITEM2 = TrackingItem.fromDBRecord(2, "testurl.com", "imgurl.png", "myitem2", Decimal('1.2'), datetime.now(), 0)
-TEST_ITEM3 = TrackingItem.fromDBRecord(3, "testurl.biz", "imgurl.jpg", "myitem3", Decimal('1.29'), datetime.now(), 0)
+TEST_ITEM = TrackingItem.fromDBRecord(1, "testurl", "imgurl", "myitem", Decimal('1.25'), datetime.now(), TrackingItem.SAMPLE_DAY)
+TEST_ITEM2 = TrackingItem.fromDBRecord(2, "testurl.com", "imgurl.png", "myitem2", Decimal('1.2'), datetime.now(), TrackingItem.SAMPLE_HOUR)
+TEST_ITEM3 = TrackingItem.fromDBRecord(3, "testurl.biz", "imgurl.jpg", "myitem3", Decimal('1.29'), datetime.now(), TrackingItem.SAMPLE_WEEK)
 
 
 TABLES = ["pricelog", "similaritem", "trackingitem", "trackinguser", "user_similar_item", "user_trackingitem"]
@@ -252,4 +262,18 @@ def test_sort_order(debugDal):
     assert items[2] == TEST_ITEM
 
 
-    
+def test_scrape_items(debugDal):
+    wipeDB(debugDal)
+    test_email1 = INITIAL_USERS[0]["user"]
+
+    debugDal.createItem(TEST_ITEM, test_email1)
+    debugDal.createItem(TEST_ITEM2, test_email1)
+    debugDal.createItem(TEST_ITEM3, test_email1)
+
+    #should be both of them
+    items = debugDal.itemsToScrape(datetime(2020, 10, 25, 0, 0))
+    assert len(items) == 3
+    items = debugDal.itemsToScrape(datetime(2020, 10, 26, 0, 0))
+    assert len(items) == 2
+    items = debugDal.itemsToScrape(datetime(2020, 10, 25, 1, 0))
+    assert len(items) == 1
