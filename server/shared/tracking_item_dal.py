@@ -104,7 +104,7 @@ class TrackingItemDAL:
         INSERT INTO trackinguser
             (userEmail, hasPrime)
         VALUES
-            (%(email)s, true)
+            (%(email)s, false)
         RETURNING id
         """
 
@@ -154,6 +154,7 @@ class TrackingItemDAL:
             %(notifyPrice)s, 
             (SELECT 1 + COALESCE(MAX(sortOrder), 0) FROM user_trackingitem WHERE userId = %(userid)s) 
             )
+        ON CONFLICT DO NOTHING
         """
 
         USER_ITEM_PARAMS = {
@@ -221,8 +222,6 @@ class TrackingItemDAL:
 
     def notificationItems(self, userEmail: str):
         userId = self.userForEmail(userEmail)
-        #id, url, imgUrl, title, priceThreshold, timeThreshold, sampleFrequency
-        #date, price, primePrice
 
         ITEM_SQL = """
         SELECT i.id, i.url, i.imgurl, i.title, ui.notifyPrice, ui.notifyDate
@@ -233,7 +232,7 @@ class TrackingItemDAL:
         ON ui.userId = u.id AND u.id = %(userId)s
         WHERE 
             ui.notifyDate <= now()
-            OR ui.notifyPrice <=  
+            OR ui.notifyPrice >=  
             (SELECT CASE WHEN u.hasPrime THEN l.primePrice ELSE l.price END
                 FROM pricelog l
                 WHERE
@@ -318,7 +317,7 @@ class TrackingItemDAL:
         INSERT INTO similaritem
         (itemId, productName, productUrl, imageUrl)
         VALUES
-        (%(itemId)s, %(prodcuctName)s, %(productUrl)s, %(imageUrl)s)
+        (%(itemId)s, %(productName)s, %(productUrl)s, %(imageUrl)s)
         """
         
         SIMILAR_PARAMS = {
@@ -364,6 +363,21 @@ class TrackingItemDAL:
         }
 
         return self.run_sql(PRIME_SQL, PRIME_PARAMS)
+
+    def isUserPrime(self, userEmail:str):
+        userId = self.userForEmail(userEmail)
+
+        PRIME_SQL = """
+        SELECT hasPrime
+        FROM trackinguser
+        WHERE id = %(userId)s
+        """
+
+        PRIME_PARAMS = {
+            "userId": userId,
+        }
+
+        return self.run_sql(PRIME_SQL, PRIME_PARAMS, cursor_readscalar)
 
 
     def itemsToScrape(self):
