@@ -82,8 +82,18 @@
           </div>
           <script>
 		  
-		    // Get the current product price inside the buybox
-            var price = document.getElementById("price_inside_buybox").innerHTML;
+            // Get the current product price inside the buybox
+	    // Handle products without default buybox
+	    // "Buy new" "buy used"
+            var price = "$0.00";
+	    var newProductExists = document.getElementById('newBuyBoxPrice');
+	
+	    if (newProductExists) {
+	       price = document.getElementById('newBuyBoxPrice').innerHTML;
+	    } else {
+	       price = document.getElementById('price_inside_buybox').innerHTML;
+	    }
+	    //var price = document.getElementById("price_inside_buybox").innerHTML;
 			
             price = price.trim();
             price = price.substring(1, price.length);
