@@ -28,11 +28,14 @@ chrome.runtime.onMessage.addListener(
 	
 	// Handle products unavailable to be shipped
 	var shipping = "";
-	var unavailableExists = document.getElementById('deliveryMessageMirId').getElementsByClassName('a-color-error');
-	if (unavailableExists) {
-		shipping = document.getElementById('deliveryMessageMirId').getElementsByClassName('a-color-error')[0].innerHTML;
+	var normalProduct = document.getElementById('shippingMessageInsideBuyBox_feature_div').getElementsByClassName('a-size-base a-color-secondary');
+	if (normalProduct.length != 0) {
+	   shipping = normalProduct[0].innerHTML;
 	} else {
-		shipping = document.getElementById('shippingMessageInsideBuyBox_feature_div').getElementsByClassName('a-size-base a-color-secondary')[0].innerHTML;
+	   var unavailableExists = document.getElementById('deliveryMessageMirId').getElementsByClassName('a-color-error');
+	   if (unavailableExists.length != 0) {
+	      shipping = unavailableExists[0].innerHTML;
+	   } 
 	}
     
 	if (request.greeting == "hello")
