@@ -23,16 +23,15 @@
       "128": "images/icon128.png"
     },
 	
-	"content_scripts" : [  
+    "content_scripts" : [  
     {  
         "matches" : ["*://*.amazon.com/*"], 
         "js" : ["js/jquery.min.js","js/inject.js","js/dom.js"]
     }],
 	
-	"web_accessible_resources": [
+    "web_accessible_resources": [
     "InjectedContentUI.html"
     ],
 	
-	"options_page": "options.html",
     "manifest_version": 2
   }
