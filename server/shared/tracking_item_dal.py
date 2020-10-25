@@ -1,4 +1,5 @@
 from decimal import * 
+from datetime import *
 
 import psycopg2
 
@@ -31,6 +32,42 @@ def cursor_readscalar_if_exists(cursor):
         return None
     else:
         return cursor.fetchone()[0]
+
+
+def cursor_read_tracking_items_with_price(cursor):
+    outVals = []
+    current_id = -1
+    current_item = None
+    for row in cursor:
+        #can't figure out string reading here
+        if row[0] != current_id:
+            current_item = TrackingItem.fromDBRecord(row[0], row[1], row[2], row[3], row[4], row[5], 0)
+            current_id = row[0]
+            outVals.append(current_item)
+
+        current_item.priceHistory.append(LoggedPrice(row[6], row[7], row[8]))
+    
+    return outVals
+
+
+def cursor_read_similar_items(cursor):
+    outVals = []
+    for row in cursor:
+        current_item = SimilarItem(*row)
+        outVals.append(current_item)
+    
+    return outVals
+
+def cursor_read_tracking_items(cursor):
+    outVals = []
+    for row in cursor:
+        current_item = TrackingItem.fromDBRecord(row[0], row[1], row[2], row[3], row[4], row[5], 0)
+        outVals.append(current_item)
+    
+    return outVals
+
+def cursor_read_scrape_tuples(cursor):
+    return cursor.fetchall()
 
 
 class TrackingItemDAL:
@@ -166,14 +203,71 @@ class TrackingItemDAL:
         return self.run_sql(LOG_SQL, LOG_PARAMS)
         
 
-    def notificationItems(self, userId: str):
-        pass
+    def notificationItems(self, userEmail: str):
+        userId = self.userForEmail(userEmail)
+        #id, url, imgUrl, title, priceThreshold, timeThreshold, sampleFrequency
+        #date, price, primePrice
 
-    def userItems(self, userId: str):
-        pass
+        ITEM_SQL = """
+        SELECT i.id, i.url, i.imgurl, i.title, ui.notifyPrice, ui.notifyDate
+        FROM trackingitem i
+        INNER JOIN user_trackingitem ui
+        ON i.id = ui.itemId
+        INNER JOIN trackinguser u
+        ON ui.userId = u.id AND u.id = %(userId)s
+        WHERE 
+            ui.notifyDate <= now()
+            OR ui.notifyPrice <=  
+            (SELECT CASE WHEN u.hasPrime THEN l.primePrice ELSE l.price END
+                FROM pricelog l
+                WHERE
+                    l.itemId = i.id
+                    AND l.logDate = (SELECT MAX(ll.logDate) FROM pricelog ll WHERE ll.itemId = i.id)
+            LIMIT 1) 
+        """
 
-    def similarItems(self, userId: str, itemId: int):
-        pass
+        ITEM_PARAMS = {"userId": userId}
+        return self.run_sql(ITEM_SQL, ITEM_PARAMS, cursor_read_tracking_items)
+
+
+    def userItems(self, userEmail: str):
+        userId = self.userForEmail(userEmail)
+
+        ITEM_SQL = """
+        SELECT i.id, i.url, i.imgurl, i.title, ui.notifyPrice, ui.notifyDate, l.date, l.price, l.primePrice
+        FROM trackingitem i
+        INNER JOIN user_trackingitem ui
+        ON i.id = ui.itemId
+        INNER JOIN trackinguser u
+        ON ui.userId = u.id 
+        INNER JOIN priceLog l
+        ON i.id = l.itemId
+        WHERE 
+            u.id = %(userId)s
+        ORDER BY ui.sortOrder, l.date
+        """
+
+        ITEM_PARAMS = {"userId": userId}
+        return self.run_sql(ITEM_SQL, ITEM_PARAMS, cursor_read_tracking_items_with_price)
+
+
+    def similarItems(self, userEmail: str, itemId: int):
+        userId = self.userForEmail(userEmail)
+
+        SIMILAR_SQL = """
+        SELECT s.productUrl, s.itemId, s.productName, s.imageUrl
+        FROM similaritem s
+        WHERE s.itemId = %(itemId)s
+            AND NOT EXISTS (SELECT 1 FROM user_similar_item us WHERE us.userId = %(userId)s AND us.similarid = s.id)
+        """
+
+        SIMILAR_PARAMS = {
+            "userId": userId,
+            "itemId": itemId
+        }
+
+        return self.run_sql(SIMILAR_SQL, SIMILAR_PARAMS, cursor_read_similar_items)
+
 
     def updateSortOrder(self, userEmail: str, itemIds: list, sortOrder: list):
         userId = self.userForEmail(userEmail)
