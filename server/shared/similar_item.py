@@ -5,3 +5,12 @@ class SimilarItem:
         self.name = name
         self.imgUrl = imgUrl
         self.price = price
+
+    def __eq__(self, other):
+        if isinstance(other, SimilarItem):
+            return (self.itemUrl == other.itemUrl 
+                and self.imgUrl == other.imgUrl 
+                and self.price == other.price 
+                and self.name == other.name
+                and self.referrerItemId == other.referrerItemId)
+        return False

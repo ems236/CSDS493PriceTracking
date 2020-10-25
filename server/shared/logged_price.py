@@ -3,3 +3,10 @@ class LoggedPrice:
         self.date = date
         self.price = price
         self.primePrice = primePrice
+
+    def __eq__(self, other):
+        if isinstance(other, LoggedPrice):
+            return (self.date == other.date 
+                and self.primePrice == other.primePrice 
+                and self.price == other.price)
+        return False
