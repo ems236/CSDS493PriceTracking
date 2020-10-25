@@ -9,8 +9,8 @@ class TrackingItem:
         self.priceHistory = priceHistory
 
     @classmethod
-    def fromDBRecord(cls, id, url, imgUrl, title, priceThreshold, timeThreshold, sampleFrequency, priceHistory):
-        return TrackingItem(id, url, imgUrl, title, priceThreshold, timeThreshold, sampleFrequency, priceHistory)
+    def fromDBRecord(cls, id, url, imgUrl, title, priceThreshold, timeThreshold, sampleFrequency):
+        return TrackingItem(id, url, imgUrl, title, priceThreshold, timeThreshold, sampleFrequency, [])
 
     @classmethod
     def fromFrontEnd(cls, url, imgUrl, title, priceThreshold, timeThreshold, sampleFrequency):
