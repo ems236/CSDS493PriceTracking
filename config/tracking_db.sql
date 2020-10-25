@@ -293,19 +293,11 @@ ALTER TABLE ONLY public.user_trackingitem
 
 
 --
--- Name: pricelog fk_item; Type: FK CONSTRAINT; Schema: public; Owner: webappuser
---
-
-ALTER TABLE ONLY public.pricelog
-    ADD CONSTRAINT fk_item FOREIGN KEY (itemid) REFERENCES public.trackingitem(id);
-
-
---
 -- Name: user_trackingitem fk_item; Type: FK CONSTRAINT; Schema: public; Owner: webappuser
 --
 
 ALTER TABLE ONLY public.user_trackingitem
-    ADD CONSTRAINT fk_item FOREIGN KEY (itemid) REFERENCES public.trackingitem(id);
+    ADD CONSTRAINT fk_item FOREIGN KEY (itemid) REFERENCES public.trackingitem(id) ON DELETE CASCADE;
 
 
 --
@@ -313,7 +305,7 @@ ALTER TABLE ONLY public.user_trackingitem
 --
 
 ALTER TABLE ONLY public.similaritem
-    ADD CONSTRAINT fk_item FOREIGN KEY (itemid) REFERENCES public.trackingitem(id);
+    ADD CONSTRAINT fk_item FOREIGN KEY (itemid) REFERENCES public.trackingitem(id) ON DELETE CASCADE;
 
 
 --
@@ -321,7 +313,15 @@ ALTER TABLE ONLY public.similaritem
 --
 
 ALTER TABLE ONLY public.user_similar_items
-    ADD CONSTRAINT fk_item FOREIGN KEY (similarid) REFERENCES public.similaritem(id);
+    ADD CONSTRAINT fk_item FOREIGN KEY (similarid) REFERENCES public.similaritem(id) ON DELETE CASCADE;
+
+
+--
+-- Name: pricelog fk_item; Type: FK CONSTRAINT; Schema: public; Owner: webappuser
+--
+
+ALTER TABLE ONLY public.pricelog
+    ADD CONSTRAINT fk_item FOREIGN KEY (itemid) REFERENCES public.trackingitem(id) ON DELETE CASCADE;
 
 
 --
@@ -329,7 +329,7 @@ ALTER TABLE ONLY public.user_similar_items
 --
 
 ALTER TABLE ONLY public.user_trackingitem
-    ADD CONSTRAINT fk_user FOREIGN KEY (userid) REFERENCES public.trackinguser(id);
+    ADD CONSTRAINT fk_user FOREIGN KEY (userid) REFERENCES public.trackinguser(id) ON DELETE CASCADE;
 
 
 --
@@ -337,7 +337,7 @@ ALTER TABLE ONLY public.user_trackingitem
 --
 
 ALTER TABLE ONLY public.user_similar_items
-    ADD CONSTRAINT fk_user FOREIGN KEY (userid) REFERENCES public.trackinguser(id);
+    ADD CONSTRAINT fk_user FOREIGN KEY (userid) REFERENCES public.trackinguser(id) ON DELETE CASCADE;
 
 
 --
