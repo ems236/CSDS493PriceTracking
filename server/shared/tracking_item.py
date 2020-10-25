@@ -5,6 +5,7 @@ class TrackingItem:
         self.imgUrl = imgUrl
         self.title = title
         self.timeThreshold = timeThreshold
+        self.priceThreshold = priceThreshold
         self.sampleFrequency = sampleFrequency
         self.priceHistory = priceHistory
 

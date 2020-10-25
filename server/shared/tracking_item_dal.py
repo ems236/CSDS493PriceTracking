@@ -45,7 +45,8 @@ def cursor_read_tracking_items_with_price(cursor):
             current_id = row[0]
             outVals.append(current_item)
 
-        current_item.priceHistory.append(LoggedPrice(row[6], row[7], row[8]))
+        if row[6] is not None:
+            current_item.priceHistory.append(LoggedPrice(row[6], row[7], row[8]))
     
     return outVals
 
@@ -122,7 +123,7 @@ class TrackingItemDAL:
         ITEM_PARAMS = {
             "url": item.url,
             "title": item.title,
-            "imgurl": item.imgurl
+            "imgurl": item.imgUrl
             }
         
         itemid = self.run_sql(ITEM_SQL, ITEM_PARAMS, cursor_readscalar)
@@ -234,17 +235,17 @@ class TrackingItemDAL:
         userId = self.userForEmail(userEmail)
 
         ITEM_SQL = """
-        SELECT i.id, i.url, i.imgurl, i.title, ui.notifyPrice, ui.notifyDate, l.date, l.price, l.primePrice
+        SELECT i.id, i.url, i.imgurl, i.title, ui.notifyPrice, ui.notifyDate, l.logDate, l.price, l.primePrice
         FROM trackingitem i
         INNER JOIN user_trackingitem ui
         ON i.id = ui.itemId
         INNER JOIN trackinguser u
         ON ui.userId = u.id 
-        INNER JOIN priceLog l
+        LEFT OUTER JOIN priceLog l
         ON i.id = l.itemId
         WHERE 
             u.id = %(userId)s
-        ORDER BY ui.sortOrder, l.date
+        ORDER BY ui.sortOrder, l.logDate
         """
 
         ITEM_PARAMS = {"userId": userId}
