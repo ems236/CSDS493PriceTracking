@@ -14,8 +14,26 @@ chrome.runtime.onMessage.addListener(
 				
 	var imgSrc = document.getElementById('landingImage').src;
 	var productName = document.getElementById('productTitle').innerHTML;
-	var productPrice = document.getElementById('price_inside_buybox').innerHTML;
-	var shipping = document.getElementById('shippingMessageInsideBuyBox_feature_div').getElementsByClassName('a-size-base a-color-secondary')[0].innerHTML;
+	  
+	// Handle products without default buybox
+	// "Buy new" "buy used"
+	var productPrice = "$0.00";
+	var newProductExists = document.getElementById('newBuyBoxPrice');
+	
+	if (newProductExists) {
+		productPrice = document.getElementById('newBuyBoxPrice').innerHTML;
+	} else {
+		productPrice = document.getElementById('price_inside_buybox').innerHTML;
+	}
+	
+	// Handle products unavailable to be shipped
+	var shipping = "";
+	var unavailableExists = document.getElementById('deliveryMessageMirId').getElementsByClassName('a-color-error');
+	if (unavailableExists) {
+		shipping = document.getElementById('deliveryMessageMirId').getElementsByClassName('a-color-error')[0].innerHTML;
+	} else {
+		shipping = document.getElementById('shippingMessageInsideBuyBox_feature_div').getElementsByClassName('a-size-base a-color-secondary')[0].innerHTML;
+	}
     
 	if (request.greeting == "hello")
       sendResponse({imgSrc: imgSrc, name: productName, price: productPrice, shipping: shipping});
