@@ -129,8 +129,25 @@ class TrackingItemDAL:
         return self.run_sql(DELTE_ITEM_SQL, DELETE_PARAMS)
 
 
-    def updateItem(self, item: TrackingItem, userId: str):
-        pass
+    def updateItem(self, item: TrackingItem, userEmail: str):
+        userId = self.userForEmail(userEmail)
+
+        UPDATE_ITEM_SQL = """
+        UPDATE user_trackingitem 
+        SET notifyDate = %(notifyDate)s,
+            notifyPrice = %(notifyPrice)s
+        WHERE itemId = %(itemId)s AND userId = %(userId)s
+        """
+
+        UPDATE_ITEM_PARAMS = {
+            "notifyDate": item.timeThreshold,
+            "notifyPrice": item.priceThreshold,
+            "itemId": item.id,
+            "userId": userId
+        }
+
+        return self.run_sql(UPDATE_ITEM_SQL, UPDATE_ITEM_PARAMS)
+
 
     def logPrice(self, itemId: int, price: Decimal, primePrice: Decimal):
         LOG_SQL = """
@@ -152,14 +169,73 @@ class TrackingItemDAL:
     def notificationItems(self, userId: str):
         pass
 
+    def userItems(self, userId: str):
+        pass
+
     def similarItems(self, userId: str, itemId: int):
         pass
 
-    def updateSortOrder(self, userId: str, itemIds: list, sortOrder: list):
-        pass
+    def updateSortOrder(self, userEmail: str, itemIds: list, sortOrder: list):
+        userId = self.userForEmail(userEmail)
+        UPDATE_SQL = """
+        UPDATE user_trackingitem
+        SET sortOrder = %(sortOrder)s
+        WHERE itemId = %(itemId)s AND userId = %(userId)s
+        """
+
+        update_params = {
+            "sortOrder": 0,
+            "itemId": 0,
+            "userId": userId
+        }
+
+        isSuccess = True
+
+        count = len(itemIds)
+        counter = 0
+        while isSuccess and counter < count:
+            update_params["itemId"] = itemIds[counter]
+            update_params["sortOrder"] = sortOrder[counter]
+            isSuccess = isSuccess and self.run_sql(UPDATE_SQL, update_params) 
+            counter += 1
+
+        return isSuccess
+
 
     def registerSimilar(self, item: SimilarItem):
-        pass
+        SIMILAR_SQL = """
+        INSERT INTO similaritem
+        (itemId, productName, productUrl, imageUrl)
+        VALUES
+        (%(itemId)s, %(prodcuctName)s, %(productUrl)s, %(imageUrl)s)
+        """
+        
+        SIMILAR_PARAMS = {
+            "itemId": item.referrerItemId,
+            "productName": item.name,
+            "productUrl": item.itemUrl,
+            "imageUrl": item.imgUrl
+        }
+
+        return self.run_sql(SIMILAR_SQL, SIMILAR_PARAMS)
+
+    def hideSimilar(self, similaritemId: int, userEmail: int):
+        userId = self.userForEmail(userEmail)
+        
+        HIDE_SQL = """
+        INSERT INTO user_similar_items
+        (similarId, userId)
+        VALUES
+        (%(itemId)s, %(userId)s)
+        """
+
+        HIDE_PARAMS = {
+            "itemId": similaritemId, 
+            "userId": userId
+        }
+
+        return self.run_sql(HIDE_SQL, HIDE_PARAMS)
+        
 
     def itemsToScrape(self):
         pass
