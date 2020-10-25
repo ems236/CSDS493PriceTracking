@@ -18,7 +18,7 @@
     function addCard(start, end, page) {
       for (let i = start; i <= end; i++) {
         var card = "<div class=\"card\">";
-        card += "      <a href=\"#\" id=\"card-link-title-" + i + "\">";
+        card += "      <a href=\"#\" id=\"card-link-title-" + i + "\" target=\"_blank\">";
         card += "         <img class=\"card-img-top\" src=\"...\" alt=\"Card image cap\" id = \"img-card" + i + "\">";
         card += "      </a>";
         card += "      <div class=\"card-body\">";
@@ -37,7 +37,7 @@
         card += "      </div>";
         card += "      <div class=\"card-footer\">";
         card += "         <small class=\"text-muted\">Last updated 3 mins ago</small>";
-        card += "         <a href=\"#\" class=\"card-link\" id=\"card-link-footer-" + i + "\">Detail</a>";
+        card += "         <a href=\"#\" class=\"card-link\" id=\"card-link-footer-" + i + "\" target=\"_blank\">Detail</a>";
         card += "         <a href=\"#\" class=\"card-link\">Delete</a>";
         card += "      </div>";
         card += "   </div>";
