@@ -134,16 +134,16 @@ ALTER TABLE public.trackinguser ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY
 
 
 --
--- Name: user_similar_items; Type: TABLE; Schema: public; Owner: webappuser
+-- Name: user_similar_item; Type: TABLE; Schema: public; Owner: webappuser
 --
 
-CREATE TABLE public.user_similar_items (
+CREATE TABLE public.user_similar_item (
     similarid integer NOT NULL,
     userid integer NOT NULL
 );
 
 
-ALTER TABLE public.user_similar_items OWNER TO webappuser;
+ALTER TABLE public.user_similar_item OWNER TO webappuser;
 
 --
 -- Name: user_trackingitem; Type: TABLE; Schema: public; Owner: webappuser
@@ -193,10 +193,10 @@ COPY public.trackinguser (id, useremail, hasprime) FROM stdin;
 
 
 --
--- Data for Name: user_similar_items; Type: TABLE DATA; Schema: public; Owner: webappuser
+-- Data for Name: user_similar_item; Type: TABLE DATA; Schema: public; Owner: webappuser
 --
 
-COPY public.user_similar_items (similarid, userid) FROM stdin;
+COPY public.user_similar_item (similarid, userid) FROM stdin;
 \.
 
 
@@ -277,11 +277,11 @@ ALTER TABLE ONLY public.trackinguser
 
 
 --
--- Name: user_similar_items user_similar_items_pkey; Type: CONSTRAINT; Schema: public; Owner: webappuser
+-- Name: user_similar_item user_similar_item_pkey; Type: CONSTRAINT; Schema: public; Owner: webappuser
 --
 
-ALTER TABLE ONLY public.user_similar_items
-    ADD CONSTRAINT user_similar_items_pkey PRIMARY KEY (similarid, userid);
+ALTER TABLE ONLY public.user_similar_item
+    ADD CONSTRAINT user_similar_item_pkey PRIMARY KEY (similarid, userid);
 
 
 --
@@ -317,10 +317,10 @@ ALTER TABLE ONLY public.user_trackingitem
 
 
 --
--- Name: user_similar_items fk_item; Type: FK CONSTRAINT; Schema: public; Owner: webappuser
+-- Name: user_similar_item fk_item; Type: FK CONSTRAINT; Schema: public; Owner: webappuser
 --
 
-ALTER TABLE ONLY public.user_similar_items
+ALTER TABLE ONLY public.user_similar_item
     ADD CONSTRAINT fk_item FOREIGN KEY (similarid) REFERENCES public.similaritem(id) ON DELETE CASCADE;
 
 
@@ -333,10 +333,10 @@ ALTER TABLE ONLY public.user_trackingitem
 
 
 --
--- Name: user_similar_items fk_user; Type: FK CONSTRAINT; Schema: public; Owner: webappuser
+-- Name: user_similar_item fk_user; Type: FK CONSTRAINT; Schema: public; Owner: webappuser
 --
 
-ALTER TABLE ONLY public.user_similar_items
+ALTER TABLE ONLY public.user_similar_item
     ADD CONSTRAINT fk_user FOREIGN KEY (userid) REFERENCES public.trackinguser(id) ON DELETE CASCADE;
 
 

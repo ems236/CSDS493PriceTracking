@@ -219,11 +219,12 @@ class TrackingItemDAL:
 
         return self.run_sql(SIMILAR_SQL, SIMILAR_PARAMS)
 
+
     def hideSimilar(self, similaritemId: int, userEmail: int):
         userId = self.userForEmail(userEmail)
         
         HIDE_SQL = """
-        INSERT INTO user_similar_items
+        INSERT INTO user_similar_item
         (similarId, userId)
         VALUES
         (%(itemId)s, %(userId)s)
@@ -235,7 +236,24 @@ class TrackingItemDAL:
         }
 
         return self.run_sql(HIDE_SQL, HIDE_PARAMS)
-        
+
+
+    def updateUserPrime(self, userEmail: str, hasPrime: bool):
+        userId = self.userForEmail(userEmail)
+
+        PRIME_SQL = """
+        UPDATE trackinguser 
+        SET hasPrime = %(hasPrime)s
+        WHERE id = %(userId)s
+        """
+
+        PRIME_PARAMS = {
+            "userId": userId,
+            "hasPrime": hasPrime
+        }
+
+        return self.run_sql(PRIME_SQL, PRIME_PARAMS)
+
 
     def itemsToScrape(self):
         pass
