@@ -10,7 +10,7 @@ def test_production_conn():
 #compare eq for that coverage
 def test_bad_eq():
     x = TrackingItem.fromFrontEnd("testurl", "imgurl", "myitem", Decimal('1.25'), datetime.now(), TrackingItem.SAMPLE_DAY)
-    y = SimilarItem("a", 1, "none", "b")
+    y = SimilarItem("a", 1, "none", "b", 0.0)
     z = LoggedPrice(datetime.now(), Decimal('1'), Decimal('2'))
 
     assert not x == y
@@ -208,10 +208,10 @@ def test_notification_items(debugDal):
     assert items[1] == TEST_ITEM3
 
 
-SIMILAR1 = SimilarItem("testurl1", 1, "simboi", "ay.jpg")
-SIMILAR2 = SimilarItem("testurl2", 1, "simboi2", "ayy.jpg")
-SIMILAR3 = SimilarItem("testurl3", 1, "simboi3", "ayyy.jpg")
-SIMILAR4 = SimilarItem("testurl4", 2, "simboi4", "ayyyy.jpg")
+SIMILAR1 = SimilarItem("testurl1", 1, "simboi", "ay.jpg", 0.0)
+SIMILAR2 = SimilarItem("testurl2", 1, "simboi2", "ayy.jpg", 0.0)
+SIMILAR3 = SimilarItem("testurl3", 1, "simboi3", "ayyy.jpg", 0.0)
+SIMILAR4 = SimilarItem("testurl4", 2, "simboi4", "ayyyy.jpg", 0.0)
 
 def test_similar_items(debugDal):
     wipeDB(debugDal)

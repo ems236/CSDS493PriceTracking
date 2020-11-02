@@ -275,7 +275,7 @@ class TrackingItemDAL:
         userId = self.userForEmail(userEmail)
 
         SIMILAR_SQL = """
-        SELECT s.productUrl, s.itemId, s.productName, s.imageUrl
+        SELECT s.productUrl, s.itemId, s.productName, s.imageUrl, s.price
         FROM similaritem s
         WHERE s.itemId = %(itemId)s
             AND NOT EXISTS (SELECT 1 FROM user_similar_item us WHERE us.userId = %(userId)s AND us.similarid = s.id)
@@ -319,16 +319,17 @@ class TrackingItemDAL:
     def registerSimilar(self, item: SimilarItem):
         SIMILAR_SQL = """
         INSERT INTO similaritem
-        (itemId, productName, productUrl, imageUrl)
+        (itemId, productName, productUrl, imageUrl, price)
         VALUES
-        (%(itemId)s, %(productName)s, %(productUrl)s, %(imageUrl)s)
+        (%(itemId)s, %(productName)s, %(productUrl)s, %(imageUrl)s, %(price)s)
         """
         
         SIMILAR_PARAMS = {
             "itemId": item.referrerItemId,
             "productName": item.name,
             "productUrl": item.itemUrl,
-            "imageUrl": item.imgUrl
+            "imageUrl": item.imgUrl,
+            "price": item.price
         }
 
         return self.run_sql(SIMILAR_SQL, SIMILAR_PARAMS)

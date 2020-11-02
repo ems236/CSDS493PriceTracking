@@ -1,0 +1,7 @@
+//dump
+pg_dump -U webappuser -W -h localhost -p 5432 pricetracking > tracking_db.sql
+
+//load
+//delete DBs first
+psql -U webappuser -W -h localhost -p 5432 pricetracking < tracking_db.sql
+psql -U webappuser -W -h localhost -p 5432 test < tracking_db.sql
