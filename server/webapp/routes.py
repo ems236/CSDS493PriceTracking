@@ -19,6 +19,12 @@ def makeSuccessResponse(dalFunc, *args):
     except Exception:
         return abort(402)
 
+def runQuery(dalFunc, *args):
+    try: 
+        return dalFunc(itemDAL, *args)
+    except Exception:
+        return None
+
 @app.route('/hello')
 def hello_world():
     return "Hello World"
@@ -63,15 +69,25 @@ def delete_item():
     
     return makeSuccessResponse(TrackingItemDAL.deleteItem, id, "ems236@case.edu")
 
-
-
 @app.route('/notify/items', methods=[GET])
 def notification_items():
-    return abort(402)
+    items = runQuery(TrackingItemDAL.notificationItems, "ems236@case.edu")
+    
+    if items is None:
+        return abort(402)
+    
+    return jsonify(items)
 
 @app.route('/similar/hide', methods=[POST])
 def hide_similar():
-    return abort(402)
+    if request.json is None or "id" not in request.json:
+        return abort(402)
+    id = request.json["id"]
+
+    if not isinstance(id, int) or id <= 0:
+        return abort(402)
+    
+    return makeSuccessResponse(TrackingItemDAL.hideSimilar, id, "ems236@case.edu")
 
 @app.route('/similar/register', methods=[POST])
 def register_similar():
@@ -79,8 +95,21 @@ def register_similar():
 
 @app.route('/user/isprime', methods=[GET])
 def user_get_prime():
-    return abort(402)
+    isPrime = runQuery(TrackingItemDAL.isUserPrime, "ems236@case.edu")
+    
+    if isPrime is None:
+        return abort(402)
+
+    return jsonify({"isPrime": isPrime})
 
 @app.route('/user/setprime', methods=[PUT])
 def user_set_prime():
-    return abort(402)
+    if request.json is None or "isPrime" not in request.json:
+        return abort(402)
+    isPrime = request.json["isPrime"]
+
+    if not isinstance(id, bool):
+        return abort(402)
+    
+    return makeSuccessResponse(TrackingItemDAL.updateUserPrime, "ems236@case.edu", isPrime)
+    
