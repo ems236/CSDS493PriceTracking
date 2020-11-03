@@ -1,5 +1,6 @@
 import datetime 
 import dateutil.parser
+import decimal
 
 def isValidString(prop, maxlen):
     return isinstance(prop, str) and len(prop) < maxlen
@@ -27,19 +28,19 @@ class TrackingItem:
     def fromDict(cls, objdict, validator):
         if objdict is None:
             return None
-            
-        params = ["id", "url", "imgUrl", "title", "timeThreshold", "priceThreshold", "sampleFrequency"]
+
+        params = ["id", "url", "imgUrl", "title", "priceThreshold", "timeThreshold", "sampleFrequency"]
         
         attrs = []
 
         for param in params:
             if param in objdict:
-                attrs += objdict[param]
+                attrs.append(objdict[param])
             else:
-                attrs += None
+                attrs.append(None)
         
         #add empty price log
-        attrs += []
+        attrs.append([])
         newObj = TrackingItem(*attrs)
 
         if validator(newObj):
@@ -51,7 +52,7 @@ class TrackingItem:
         props = [
             (self.url, str),
             (self.imgUrl, str),
-            (self.priceThreshold, float),
+            (self.priceThreshold, str),
             (self.timeThreshold, str),
             (self.title, str),
             (self.sampleFrequency, int),
@@ -67,7 +68,7 @@ class TrackingItem:
     def isValidUpdate(self):
         props = [
             (self.id, int),
-            (self.priceThreshold, float),
+            (self.priceThreshold, str),
             (self.timeThreshold, str),
             (self.sampleFrequency, int),
         ]
@@ -81,13 +82,16 @@ class TrackingItem:
         return self.id > 0 and self.isValidTrackingData()
 
     def isValidTrackingData(self):
-        isValidSample = TrackingItem.SAMPLE_HOUR <= self.sampleFrequency and self.sampleFrequency <= TrackingItem.SAMPLE_WEEK
-        isValidPrice = self.priceThreshold >= 0
+        isValidPrice = False
         try:
             self.timeThreshold = dateutil.parser.parse(self.timeThreshold)
+            self.priceThreshold = decimal.Decimal(self.priceThreshold)
+            isValidPrice = self.priceThreshold >= 0.0
+
         except Exception:
             return False
 
+        isValidSample = TrackingItem.SAMPLE_HOUR <= self.sampleFrequency and self.sampleFrequency <= TrackingItem.SAMPLE_WEEK
         return isValidSample and isValidPrice
 
     def __eq__(self, other):

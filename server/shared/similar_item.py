@@ -23,12 +23,10 @@ class SimilarItem:
 
         for param in params:
             if param[0] in objdict and isinstance(param[0], param[1]):
-                attrs += objdict[param]
+                attrs.append(objdict[param])
             else:
                 return None
-        
-        #add empty price log
-        attrs += []
+    
         newObj = SimilarItem(*attrs)
 
         #let sql deal with the strings
