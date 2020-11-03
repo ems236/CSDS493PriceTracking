@@ -289,7 +289,7 @@ class TrackingItemDAL:
         return self.run_sql(SIMILAR_SQL, SIMILAR_PARAMS, cursor_read_similar_items)
 
 
-    def updateSortOrder(self, userEmail: str, itemIds: list, sortOrder: list):
+    def updateSortOrder(self, userEmail: str, itemIds: list):
         userId = self.userForEmail(userEmail)
         UPDATE_SQL = """
         UPDATE user_trackingitem
@@ -306,10 +306,10 @@ class TrackingItemDAL:
         isSuccess = True
 
         count = len(itemIds)
-        counter = 0
-        while isSuccess and counter < count:
-            update_params["itemId"] = itemIds[counter]
-            update_params["sortOrder"] = sortOrder[counter]
+        counter = 1
+        while isSuccess and counter <= count:
+            update_params["itemId"] = itemIds[counter - 1]
+            update_params["sortOrder"] = counter
             isSuccess = isSuccess and self.run_sql(UPDATE_SQL, update_params) 
             counter += 1
 

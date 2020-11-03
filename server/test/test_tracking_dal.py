@@ -9,7 +9,7 @@ def test_production_conn():
 
 #compare eq for that coverage
 def test_bad_eq():
-    x = TrackingItem.fromFrontEnd("testurl", "imgurl", "myitem", Decimal('1.25'), datetime.now(), TrackingItem.SAMPLE_DAY)
+    x = TrackingItem.fromDBRecord(1, "testurl", "imgurl", "myitem", Decimal('1.25'), datetime.now(), TrackingItem.SAMPLE_DAY)
     y = SimilarItem("a", 1, "none", "b", 0.0)
     z = LoggedPrice(datetime.now(), Decimal('1'), Decimal('2'))
 
@@ -253,7 +253,7 @@ def test_sort_order(debugDal):
     assert items[1] == TEST_ITEM2
     assert items[2] == TEST_ITEM3
 
-    debugDal.updateSortOrder(test_email, [1, 2, 3], [3, 1, 2])
+    debugDal.updateSortOrder(test_email, [2, 3, 1])
 
     items = debugDal.userItems(test_email)
     assert len(items) == 3
