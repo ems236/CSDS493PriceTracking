@@ -91,7 +91,11 @@ def hide_similar():
 
 @app.route('/similar/register', methods=[POST])
 def register_similar():
-    return abort(402)
+    item = SimilarItem.fromDict(request.json)
+    if item is None:
+        return abort(402)
+    
+    return makeSuccessResponse(TrackingItemDAL.registerSimilar, item, "ems236@case.edu")
 
 @app.route('/user/isprime', methods=[GET])
 def user_get_prime():
