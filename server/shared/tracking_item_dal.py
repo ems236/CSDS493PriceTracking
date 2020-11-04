@@ -275,10 +275,11 @@ class TrackingItemDAL:
         userId = self.userForEmail(userEmail)
 
         SIMILAR_SQL = """
-        SELECT s.productUrl, s.itemId, s.productName, s.imageUrl, s.price
+        SELECT s.id, s.productUrl, s.itemId, s.productName, s.imageUrl, s.price
         FROM similaritem s
         WHERE s.itemId = %(itemId)s
             AND NOT EXISTS (SELECT 1 FROM user_similar_item us WHERE us.userId = %(userId)s AND us.similarid = s.id)
+        ORDER BY s.id
         """
 
         SIMILAR_PARAMS = {

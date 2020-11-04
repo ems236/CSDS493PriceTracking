@@ -1,5 +1,6 @@
 class SimilarItem:
-    def __init__(self, itemUrl, referrerItemId, name, imgUrl, price):
+    def __init__(self, id, itemUrl, referrerItemId, name, imgUrl, price):
+        self.id = id
         self.itemUrl = itemUrl
         self.referrerItemId = referrerItemId
         self.name = name
@@ -27,7 +28,7 @@ class SimilarItem:
             else:
                 return None
     
-        newObj = SimilarItem(*attrs)
+        newObj = SimilarItem(-1, *attrs)
 
         #let sql deal with the strings
         if newObj.referrerItemId >= 1 and newObj.price >= 0:
