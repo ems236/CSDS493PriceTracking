@@ -182,4 +182,54 @@ def test_getsetPrime(client):
     assert isPrime
 
     
-#def test_registerSimilar(client):
+VALID_SIMILAR_ITEM = {
+    "itemUrl": "someUrl",
+    "imgUrl": "somejpeg",
+    "name": "mysimilar",
+    "referrerItemId": 1,
+    "price": "12.5"
+}
+
+def test_registerSimilar(client):
+    client.post("/item/register", 
+                    data=json.dumps(VALID_ITEM),
+                    content_type='application/json')
+
+    res = client.post("/similar/register", 
+                    data=json.dumps(BAD_JSON),
+                    content_type='application/json')
+    assert res.status_code == 422
+
+    res = client.post("/similar/register", 
+                    data=json.dumps(VALID_SIMILAR_ITEM),
+                    content_type='application/json')
+
+    checkStatus(res, True)
+
+def test_hideSimilar(client):
+    client.post("/item/register", 
+                    data=json.dumps(VALID_ITEM),
+                    content_type='application/json')
+    client.post("/similar/register", 
+                    data=json.dumps(VALID_SIMILAR_ITEM),
+                    content_type='application/json')
+
+    res = client.post("/similar/hide", 
+                    data=json.dumps(BAD_JSON),
+                    content_type='application/json')
+    assert res.status_code == 422
+
+    badDelete = {"id": -1}
+    res = client.post("/similar/hide", 
+                    data=json.dumps(badDelete),
+                    content_type='application/json')
+    assert res.status_code == 422
+
+    deleteItem = {
+        "id": 1
+    }
+
+    res = client.post("/similar/hide", 
+                    data=json.dumps(deleteItem),
+                    content_type='application/json')
+    checkStatus(res, True)

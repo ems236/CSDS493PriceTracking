@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 class SimilarItem:
     def __init__(self, id, itemUrl, referrerItemId, name, imgUrl, price):
         self.id = id
@@ -14,21 +16,26 @@ class SimilarItem:
             
         params = [
             ("itemUrl", str), 
-            ("imgUrl", str),
-            ("name", str),
             ("referrerItemId", int),
-            ("price", float),
+            ("name", str),
+            ("imgUrl", str),
+            ("price", str),
         ]
         
         attrs = []
 
         for param in params:
-            if param[0] in objdict and isinstance(param[0], param[1]):
-                attrs.append(objdict[param])
+            if param[0] in objdict and isinstance(objdict[param[0]], param[1]):
+                attrs.append(objdict[param[0]])
             else:
                 return None
     
         newObj = SimilarItem(-1, *attrs)
+
+        try:
+            newObj.price = Decimal(newObj.price)
+        except Exception:
+            return None
 
         #let sql deal with the strings
         if newObj.referrerItemId >= 1 and newObj.price >= 0:

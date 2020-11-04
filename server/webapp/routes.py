@@ -108,7 +108,7 @@ def register_similar():
     if item is None:
         abort(422)
     
-    return makeSuccessResponse(TrackingItemDAL.registerSimilar, item, "ems236@case.edu")
+    return makeSuccessResponse(TrackingItemDAL.registerSimilar, item)
 
 @app.route('/user/isprime', methods=[GET])
 def user_get_prime():
