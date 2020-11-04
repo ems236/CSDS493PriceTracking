@@ -15,15 +15,22 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
 	console.log("product name: " + response.name.trim());
 	console.log("product price: " + response.price);
 	console.log("product shipping fee: " + response.shipping.trim());
+	console.log("similar img urls: " + response.similarImgSrc);
+	console.log("similar item names: " + response.similarItemName);
+	console.log("similar item prices: " + response.similarItemPrice);
+	console.log("similar item urls: " + response.similarItemUrl);
 	console.log(tabs[0].url);
 	
 	// Set clickable image and direct detail page to the product 
 	document.getElementById('card-link-title-1').setAttribute("href", tabs[0].url);
-	document.getElementById('card-link-footer-1').setAttribute("href", tabs[0].url);
+	//document.getElementById('card-link-footer-1').setAttribute("href", tabs[0].url);
 	
 	// Set first product information
 	document.getElementById('img-card1').setAttribute("src", response.imgSrc);
 		
+	// Set all similar items to a certain product
+	
+	
 	// Handle possible shipping fee
 	var price = response.price.trim();
 	var shippingFee = response.shipping.trim();
@@ -34,6 +41,7 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
 	} else {
 	   shippingFee = "0.00";
 	}
+	
 	var totalAmt = parseFloat(price.substring(1, price.length)) + parseFloat(shippingFee);
 	//console.log("total amount: " + totalAmt);
 	//document.getElementById('current-price-card1').setAttribute(innerHTML, totalAmt.toPrecision(4));
@@ -43,11 +51,9 @@ chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
 	var productName = response.name.trim();
 	var productNameShortened = productName;
 	if (productName.includes(",")){
-		productNameShortened = productName.substr(0, productName.indexOf(","));
+	   productNameShortened = productName.substr(0, productName.indexOf(","));
 	} 
 	document.getElementById('card-title1').innerHTML = productNameShortened;
     
   });
 });
-
-//
