@@ -1,6 +1,7 @@
 import pytest
 import json
 from datetime import datetime
+from decimal import Decimal
 #pytest --cov-report term-missing --cov=server --pdb
 from server.webapp import app
 from server.shared.tracking_item_dal import TrackingItemDAL
@@ -28,15 +29,8 @@ def checkStatus(res, status):
     resData = json.loads(res.data)
     assert "success" in resData and resData["success"] == status
 
-def test_trackingitem(client):
-    badItem = {"badAttr": 1}
-    res = client.post("/item/register", 
-                    data=json.dumps(badItem),
-                    content_type='application/json')
-    assert res.status_code == 422
-
-    #"id", "url", "imgUrl", "title", "timeThreshold", "priceThreshold", "sampleFrequency"
-    goodItem = {
+BAD_JSON = {"badAttr": 1}
+VALID_ITEM = {
         "url": "testurl",
         "imgUrl": "imgtest",
         "title": "amazonitem",
@@ -45,14 +39,29 @@ def test_trackingitem(client):
         "sampleFrequency": 1
     }
 
+SIMILAR_ITEM = {
+
+}
+
+def test_insertitem(client):
     res = client.post("/item/register", 
-                    data=json.dumps(goodItem),
+                    data=json.dumps(BAD_JSON),
+                    content_type='application/json')
+    assert res.status_code == 422
+
+    res = client.post("/item/register", 
+                    data=json.dumps(VALID_ITEM),
                     content_type='application/json')
 
     checkStatus(res, True)
 
+def test_updateitem(client):
+    client.post("/item/register", 
+                    data=json.dumps(VALID_ITEM),
+                    content_type='application/json')
+
     res = client.put("/item/update/tracking", 
-                    data=json.dumps(badItem),
+                    data=json.dumps(BAD_JSON),
                     content_type='application/json')
     assert res.status_code == 422
     
@@ -71,10 +80,23 @@ def test_trackingitem(client):
     checkStatus(res, True)
 
 
+def test_sortorder(client):
+    client.post("/item/register", 
+                    data=json.dumps(VALID_ITEM),
+                    content_type='application/json')
+
+
     res = client.put("/item/update/sortorder", 
-                    data=json.dumps(badItem),
+                    data=json.dumps(BAD_JSON),
                     content_type='application/json')
     assert res.status_code == 422
+
+    badSort = {"itemIds": [-1, 1, 5]}
+    res = client.put("/item/update/sortorder", 
+                    data=json.dumps(badSort),
+                    content_type='application/json')
+    assert res.status_code == 422
+
 
     updateSort = {
         "itemIds": [1]
@@ -86,8 +108,20 @@ def test_trackingitem(client):
 
     checkStatus(res, True)
 
+
+def test_deleteitem(client):
+    client.post("/item/register", 
+                    data=json.dumps(VALID_ITEM),
+                    content_type='application/json')
+
     res = client.delete("/item/delete", 
-                    data=json.dumps(badItem),
+                    data=json.dumps(BAD_JSON),
+                    content_type='application/json')
+    assert res.status_code == 422
+
+    badDelete = {"id": -1}
+    res = client.delete("/item/delete", 
+                    data=json.dumps(badDelete),
                     content_type='application/json')
     assert res.status_code == 422
 
@@ -101,3 +135,51 @@ def test_trackingitem(client):
 
     checkStatus(res, True)
 
+
+def test_notifyitem(client):
+    res = client.get("/notify/items")
+    assert res.status_code == 200
+    assert res.json is not None and "items" in res.json
+
+    items = res.json["items"]
+    assert len(items) == 0
+    
+    client.post("/item/register", 
+                    data=json.dumps(VALID_ITEM),
+                    content_type='application/json')
+    
+    testDal = TrackingItemDAL(True)
+    testDal.logPrice(1, Decimal('1.5'), Decimal('1.5'))
+
+    res = client.get("/notify/items")
+    assert res.status_code == 200
+    assert res.json is not None and "items" in res.json
+
+    items = res.json["items"]
+    assert len(items) == 1
+
+
+def test_getsetPrime(client):
+    res = client.put("/user/setprime", 
+                    data=json.dumps({"isPrime": 1}),
+                    content_type='application/json')
+    assert res.status_code == 422
+
+    res = client.put("/user/setprime", 
+                    data=json.dumps({}),
+                    content_type='application/json')
+    assert res.status_code == 422
+
+    res = client.put("/user/setprime", 
+                    data=json.dumps({"isPrime": True}),
+                    content_type='application/json')
+    checkStatus(res, True)
+    
+    res = client.get("/user/isprime")
+    assert res.status_code == 200
+    assert res.json is not None and "isPrime" in res.json
+    isPrime = res.json["isPrime"]
+    assert isPrime
+
+    
+#def test_registerSimilar(client):

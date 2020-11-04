@@ -77,7 +77,19 @@ def notification_items():
     if items is None:
         abort(422)
     
-    return jsonify(items)
+    itemList = []
+    for item in items:
+        itemDict = {
+            "id": item.id,
+            "priceThreshold": str(item.priceThreshold),
+            "timeThreshold": item.timeThreshold.isoformat(),
+            "url": item.url,
+            "imgUrl": item.imgUrl,
+            "title":item.title
+        } 
+        itemList.append(itemDict)
+
+    return jsonify({"items": itemList})
 
 @app.route('/similar/hide', methods=[POST])
 def hide_similar():
@@ -113,7 +125,7 @@ def user_set_prime():
         abort(422)
     isPrime = request.json["isPrime"]
 
-    if not isinstance(id, bool):
+    if not isinstance(isPrime, bool):
         abort(422)
     
     return makeSuccessResponse(TrackingItemDAL.updateUserPrime, "ems236@case.edu", isPrime)
