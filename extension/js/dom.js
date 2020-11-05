@@ -22,15 +22,15 @@ chrome.runtime.onMessage.addListener(
 	var similarItemPrice = [];
 	var similarItemUrl = [];
 	for (var i = 0; i < similarItems.length; i++) {
-          similarItemImgSrc[i] = similarItems[i].getElementsByTagName('img')[0].getAttribute("src") + ";";
-	  similarItemName[i] = similarItems[i].getElementsByTagName('div')[2].innerHTML.trim();
-	  similarItemPrice[i] = similarItems[i].getElementsByClassName("p13n-sc-price")[0].innerHTML.trim();
-	  similarItemUrl[i] = "https://www.amazon.com" +similarItems[i].getElementsByTagName('a')[0].getAttribute("href");
-	  console.log(similarItemImgSrc[i]);
-	  console.log(similarItemName[i]);
-	  console.log(similarItemPrice[i]);
-	  console.log(similarItemUrl[i]);
-        }
+       similarItemImgSrc[i] = similarItems[i].getElementsByTagName('img')[0].getAttribute("src");
+	   similarItemName[i] = similarItems[i].getElementsByTagName('div')[2].innerHTML.trim();
+	   similarItemPrice[i] = similarItems[i].getElementsByClassName("p13n-sc-price")[0].innerHTML.trim();
+	   similarItemUrl[i] = "https://www.amazon.com" +similarItems[i].getElementsByTagName('a')[0].getAttribute("href");
+	   //console.log(similarItemImgSrc[i]);
+	   //console.log(similarItemName[i]);
+	   //console.log(similarItemPrice[i]);
+	   //console.log(similarItemUrl[i]);
+    }
 	
     
 	
@@ -40,9 +40,9 @@ chrome.runtime.onMessage.addListener(
 	var newProductExists = document.getElementById('newBuyBoxPrice');
 	
 	if (newProductExists) {
-	  productPrice = document.getElementById('newBuyBoxPrice').innerHTML;
+		productPrice = document.getElementById('newBuyBoxPrice').innerHTML;
 	} else {
-	  productPrice = document.getElementById('price_inside_buybox').innerHTML;
+		productPrice = document.getElementById('price_inside_buybox').innerHTML;
 	}
 	
 	// Handle products unavailable to be shipped
@@ -59,13 +59,13 @@ chrome.runtime.onMessage.addListener(
 	
 	
 	if (request.greeting == "hello")
-          sendResponse({imgSrc: imgSrc, 
-                        name: productName, 
-                        price: productPrice, 
-                        shipping: shipping, 
-                        similarImgSrc: similarItemImgSrc,
-                        similarItemName: similarItemName,
-                        similarItemPrice: similarItemPrice,
-			similarItemUrl: similarItemUrl
-			});
+      sendResponse({imgSrc: imgSrc, 
+                    name: productName, 
+                    price: productPrice, 
+                    shipping: shipping, 
+                    similarImgSrc: similarItemImgSrc,
+                    similarItemName: similarItemName,
+                    similarItemPrice: similarItemPrice,
+					similarItemUrl: similarItemUrl
+					});
   });
