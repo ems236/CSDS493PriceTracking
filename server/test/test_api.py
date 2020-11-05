@@ -2,7 +2,7 @@ import pytest
 import json
 from datetime import datetime
 from decimal import Decimal
-#pytest --cov-report term-missing --cov=server --pdb
+#pytest --cov-config=.coveragerc --cov-report term-missing --cov=server --pdb
 from server.webapp import app
 from server.shared.tracking_item_dal import TrackingItemDAL
 

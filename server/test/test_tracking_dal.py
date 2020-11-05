@@ -1,6 +1,6 @@
 import pytest
 import psycopg2
-#pytest --cov-report term-missing --cov=server/shared --pdb
+#pytest --cov-config=.coveragerc --cov-report term-missing --cov=server/shared --pdb
 from server.shared.tracking_item_dal import *
 
 def test_production_conn():

@@ -1,2 +1,2 @@
 [run]
-omit = server/test
+omit = server/test/*
