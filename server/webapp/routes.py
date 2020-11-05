@@ -4,7 +4,7 @@ from server.webapp import app
 from server.shared.tracking_item import TrackingItem
 from server.shared.similar_item import SimilarItem
 from server.shared.tracking_item_dal import TrackingItemDAL
-
+from server.webapp.oauthManager import idForToken
 GET = 'GET'
 POST = 'POST'
 PUT = 'PUT'
@@ -32,23 +32,26 @@ def hello_world():
 
 @app.route('/item/register', methods=[POST])
 def register_item():
+    user = idForToken(request) 
     item = TrackingItem.fromDict(request.json, TrackingItem.isValidInsert)
     if item is None:
         abort(422)
     
-    return makeSuccessResponse(TrackingItemDAL.createItem, item, "ems236@case.edu")
+    return makeSuccessResponse(TrackingItemDAL.createItem, item, user)
 
 @app.route('/item/update/tracking', methods=[PUT])
 def update_item():
+    user = idForToken(request) 
     item = TrackingItem.fromDict(request.json, TrackingItem.isValidUpdate)
     if item is None:
         abort(422)
     
-    return makeSuccessResponse(TrackingItemDAL.updateItem, item, "ems236@case.edu")
+    return makeSuccessResponse(TrackingItemDAL.updateItem, item, user)
         
 
 @app.route('/item/update/sortorder', methods=[PUT])
 def update_sort_order():
+    user = idForToken(request) 
     if request.json is None or "itemIds" not in request.json:
         abort(422)
     itemIds = request.json["itemIds"]
@@ -57,10 +60,11 @@ def update_sort_order():
         if not isinstance(id, int) or id <= 0:
             abort(422) 
 
-    return makeSuccessResponse(TrackingItemDAL.updateSortOrder, "ems236@case.edu", itemIds)
+    return makeSuccessResponse(TrackingItemDAL.updateSortOrder, user, itemIds)
 
 @app.route('/item/delete', methods=[DELETE])
 def delete_item():
+    user = idForToken(request) 
     if request.json is None or "id" not in request.json:
         abort(422)
     id = request.json["id"]
@@ -68,11 +72,12 @@ def delete_item():
     if not isinstance(id, int) or id <= 0:
         abort(422)
     
-    return makeSuccessResponse(TrackingItemDAL.deleteItem, id, "ems236@case.edu")
+    return makeSuccessResponse(TrackingItemDAL.deleteItem, id, user)
 
 @app.route('/notify/items', methods=[GET])
 def notification_items():
-    items = runQuery(TrackingItemDAL.notificationItems, "ems236@case.edu")
+    user = idForToken(request) 
+    items = runQuery(TrackingItemDAL.notificationItems, user)
     
     if items is None:
         abort(422)
@@ -93,6 +98,7 @@ def notification_items():
 
 @app.route('/similar/hide', methods=[POST])
 def hide_similar():
+    user = idForToken(request) 
     if request.json is None or "id" not in request.json:
         abort(422)
     id = request.json["id"]
@@ -100,10 +106,11 @@ def hide_similar():
     if not isinstance(id, int) or id <= 0:
         abort(422)
     
-    return makeSuccessResponse(TrackingItemDAL.hideSimilar, id, "ems236@case.edu")
+    return makeSuccessResponse(TrackingItemDAL.hideSimilar, id, user)
 
 @app.route('/similar/register', methods=[POST])
 def register_similar():
+    user = idForToken(request) 
     item = SimilarItem.fromDict(request.json)
     if item is None:
         abort(422)
@@ -112,7 +119,8 @@ def register_similar():
 
 @app.route('/user/isprime', methods=[GET])
 def user_get_prime():
-    isPrime = runQuery(TrackingItemDAL.isUserPrime, "ems236@case.edu")
+    user = idForToken(request) 
+    isPrime = runQuery(TrackingItemDAL.isUserPrime, user)
     
     if isPrime is None:
         abort(422)
@@ -121,6 +129,7 @@ def user_get_prime():
 
 @app.route('/user/setprime', methods=[PUT])
 def user_set_prime():
+    user = idForToken(request) 
     if request.json is None or "isPrime" not in request.json:
         abort(422)
     isPrime = request.json["isPrime"]
@@ -128,5 +137,5 @@ def user_set_prime():
     if not isinstance(isPrime, bool):
         abort(422)
     
-    return makeSuccessResponse(TrackingItemDAL.updateUserPrime, "ems236@case.edu", isPrime)
+    return makeSuccessResponse(TrackingItemDAL.updateUserPrime, user, isPrime)
     
