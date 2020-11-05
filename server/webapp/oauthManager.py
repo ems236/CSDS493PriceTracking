@@ -9,7 +9,7 @@ from server.webapp import app
 
 def idForToken(request):
     if request.json is None or "token" not in request.json:
-        abort(403)
+        abort(422)
 
     if app.config["IS_TEST"]:
         return "ems236@case.edu"

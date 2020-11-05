@@ -29,7 +29,9 @@ def checkStatus(res, status):
     resData = json.loads(res.data)
     assert "success" in resData and resData["success"] == status
 
-BAD_JSON = {"badAttr": 1}
+BAD_JSON = {"badAttr": 1
+        , "token": 1
+}
 VALID_ITEM = {
         "url": "testurl",
         "imgUrl": "imgtest",
@@ -37,6 +39,7 @@ VALID_ITEM = {
         "timeThreshold": datetime.now().isoformat(),
         "priceThreshold": "51.2",
         "sampleFrequency": 1
+        , "token": 1
     }
 
 def test_insertitem(client):
@@ -67,6 +70,7 @@ def test_updateitem(client):
         "timeThreshold": datetime.now().isoformat(),
         "priceThreshold": "51.1",
         "sampleFrequency": 2
+        , "token": 1
     }
 
     res = client.put("/item/update/tracking", 
@@ -87,7 +91,9 @@ def test_sortorder(client):
                     content_type='application/json')
     assert res.status_code == 422
 
-    badSort = {"itemIds": [-1, 1, 5]}
+    badSort = {"itemIds": [-1, 1, 5]
+        , "token": 1
+    }
     res = client.put("/item/update/sortorder", 
                     data=json.dumps(badSort),
                     content_type='application/json')
@@ -96,6 +102,7 @@ def test_sortorder(client):
 
     updateSort = {
         "itemIds": [1]
+        , "token": 1
     }
 
     res = client.put("/item/update/sortorder", 
@@ -115,7 +122,9 @@ def test_deleteitem(client):
                     content_type='application/json')
     assert res.status_code == 422
 
-    badDelete = {"id": -1}
+    badDelete = {"id": -1
+        , "token": 1
+    }
     res = client.delete("/item/delete", 
                     data=json.dumps(badDelete),
                     content_type='application/json')
@@ -123,6 +132,7 @@ def test_deleteitem(client):
 
     deleteItem = {
         "id": 1
+        , "token": 1
     }
 
     res = client.delete("/item/delete", 
@@ -133,7 +143,9 @@ def test_deleteitem(client):
 
 
 def test_notifyitem(client):
-    res = client.get("/notify/items")
+    res = client.get("/notify/items",
+                    data=json.dumps({"token": 1}),
+                    content_type='application/json')
     assert res.status_code == 200
     assert res.json is not None and "items" in res.json
 
@@ -147,7 +159,9 @@ def test_notifyitem(client):
     testDal = TrackingItemDAL(True)
     testDal.logPrice(1, Decimal('1.5'), Decimal('1.5'))
 
-    res = client.get("/notify/items")
+    res = client.get("/notify/items",
+                    data=json.dumps({"token": 1}),
+                    content_type='application/json')
     assert res.status_code == 200
     assert res.json is not None and "items" in res.json
 
@@ -157,21 +171,29 @@ def test_notifyitem(client):
 
 def test_getsetPrime(client):
     res = client.put("/user/setprime", 
-                    data=json.dumps({"isPrime": 1}),
+                    data=json.dumps({"isPrime": 1
+                    , "token":1
+                    }),
                     content_type='application/json')
     assert res.status_code == 422
 
     res = client.put("/user/setprime", 
-                    data=json.dumps({}),
+                    data=json.dumps({
+                    "token":1
+                    }),
                     content_type='application/json')
     assert res.status_code == 422
 
     res = client.put("/user/setprime", 
-                    data=json.dumps({"isPrime": True}),
+                    data=json.dumps({"isPrime": True
+                    , "token":1
+                    }),
                     content_type='application/json')
     checkStatus(res, True)
     
-    res = client.get("/user/isprime")
+    res = client.get("/user/isprime", 
+                    data=json.dumps({"token": 1}),
+                    content_type='application/json')
     assert res.status_code == 200
     assert res.json is not None and "isPrime" in res.json
     isPrime = res.json["isPrime"]
@@ -183,7 +205,8 @@ VALID_SIMILAR_ITEM = {
     "imgUrl": "somejpeg",
     "name": "mysimilar",
     "referrerItemId": 1,
-    "price": "12.5"
+    "price": "12.5",
+    "token": 1
 }
 
 def test_registerSimilar(client):
@@ -215,7 +238,9 @@ def test_hideSimilar(client):
                     content_type='application/json')
     assert res.status_code == 422
 
-    badDelete = {"id": -1}
+    badDelete = {"id": -1
+                    , "token":1
+    }
     res = client.post("/similar/hide", 
                     data=json.dumps(badDelete),
                     content_type='application/json')
@@ -223,6 +248,7 @@ def test_hideSimilar(client):
 
     deleteItem = {
         "id": 1
+                    , "token":1
     }
 
     res = client.post("/similar/hide", 
