@@ -1,4 +1,5 @@
 import pytest
+import psycopg2
 #pytest --cov-report term-missing --cov=server/shared --pdb
 from server.shared.tracking_item_dal import *
 
@@ -97,27 +98,32 @@ def test_nullable_scalar(debugDal):
     one = debugDal.run_sql("SELECT 1 WHERE 1 = 1", {}, cursor_readscalar_if_exists)
     assert 1 == 1
 
-
+#DAL-1,2
 def test_user_lookup(debugDal):
     wipeDB(debugDal)
     for user in INITIAL_USERS:
         debugDal.run_sql("INSERT INTO trackinguser (userEmail, hasPrime) VALUES (%(user)s, true)", user)
 
     assert count(debugDal, "trackinguser") == 2
+    #DAL-2
     assert debugDal.userForEmail("ems236@case.edu") == 1
     assert count(debugDal, "trackinguser") == 2
+    #DAL-1
     assert debugDal.userForEmail("ellis.saupe2@gmail.com") == 3
     assert count(debugDal, "trackinguser") == 3
 
+#DAL 15,16
 def testPrimeGetSet(debugDal):
     wipeDB(debugDal)
     email = "ems236@case.edu"
     assert debugDal.userForEmail(email) == 1
+    #DAL-16
     assert not debugDal.isUserPrime(email)
+    #DAL-15
     assert debugDal.updateUserPrime(email, True)
     assert debugDal.isUserPrime(email)
 
-
+#DAL-3,4,6,10,11,17,18
 def test_single_item(debugDal):
     wipeDB(debugDal)
 
@@ -125,31 +131,50 @@ def test_single_item(debugDal):
 
     assert count(debugDal, "trackingitem") == 0
     assert count(debugDal, "user_trackingitem") == 0
+    #DAL-3
     debugDal.createItem(TEST_ITEM, test_email)
     assert count(debugDal, "trackingitem") == 1
     assert count(debugDal, "user_trackingitem") == 1
 
+    #DAL-10
     items = debugDal.userItems(test_email)
     assert len(items) == 1
     assert items[0] == TEST_ITEM
 
     TEST_ITEM.priceThreshold += Decimal(100.06)
+    #DAL-17
     assert debugDal.updateItem(TEST_ITEM, test_email)
     items = debugDal.userItems(test_email)
     assert len(items) == 1
     assert items[0] == TEST_ITEM
 
+    #DAL-18
+    TEST_ITEM.id = 100
+    assert debugDal.updateItem(TEST_ITEM, test_email)
+    items = debugDal.userItems(test_email)
+    assert len(items) == 1
+    TEST_ITEM.id = 1
+    assert items[0] == TEST_ITEM
+
+    #DAL-6
     assert debugDal.deleteItem(TEST_ITEM.id, test_email)
     #the item doesn't get deleted, just the fact that the user is tracking it
     assert count(debugDal, "trackingitem") == 1
     assert count(debugDal, "user_trackingitem") == 0
+
+    #DAL-11
     items = debugDal.userItems(test_email)
     assert len(items) == 0
+
+    #DAL-4
+    debugDal.createItem(TEST_ITEM, test_email)
+    assert count(debugDal, "trackingitem") == 1
+    assert count(debugDal, "user_trackingitem") == 1
 
     TEST_ITEM.priceThreshold -= Decimal(100.06)
 
 
-
+#DAL-5
 def test_many_item(debugDal):
     wipeDB(debugDal)
 
@@ -165,6 +190,7 @@ def test_many_item(debugDal):
     
     #this duplicate is a sneaky way that broke the query earlier
     debugDal.createItem(TEST_ITEM, test_email)
+    #DAL-5
     debugDal.createItem(TEST_ITEM, test_email)
     debugDal.createItem(TEST_ITEM2, test_email)
     debugDal.createItem(TEST_ITEM3, test_email)
@@ -177,7 +203,8 @@ def test_many_item(debugDal):
     assert items[1] == TEST_ITEM2
     assert items[2] == TEST_ITEM3
 
-
+#TODO DAL-8 is missing
+#DAL-7,9
 def test_log_price(debugDal):
     wipeDB(debugDal)
     test_email = INITIAL_USERS[0]["user"]
@@ -197,6 +224,7 @@ def test_log_price(debugDal):
     TEST_ITEM2.priceHistory = prices2
     TEST_ITEM3.priceHistory = prices3
 
+    #DAL-7
     for price in prices1:
         debugDal.logPrice(TEST_ITEM.id, price.price, price.primePrice)
 
@@ -208,6 +236,7 @@ def test_log_price(debugDal):
 
     assert count(debugDal, "pricelog") == len(prices1) + len(prices2) + len(prices3)
 
+    #DAL-9
     items = debugDal.userItems(test_email)
     assert len(items) == 3
     assert items[0] == TEST_ITEM
@@ -219,7 +248,14 @@ def test_log_price(debugDal):
     TEST_ITEM2.priceHistory = []
     TEST_ITEM3.priceHistory = []
 
+    #DAL-8
+    try:
+        debugDal.logPrice(100, Decimal('15.7'), Decimal('13.0'))
+        assert False
+    except psycopg2.Error:
+        assert True
 
+#DAL 12,13,14
 def test_notification_items(debugDal):
     wipeDB(debugDal)
 
@@ -234,18 +270,21 @@ def test_notification_items(debugDal):
     price = LoggedPrice(datetime.min, Decimal('12.0'), Decimal('10.0'))
     debugDal.logPrice(TEST_ITEM.id, price.price, price.primePrice)
 
+    #DAL-14
     items = debugDal.notificationItems(test_email)
     assert len(items) == 0
 
     price2 = LoggedPrice(datetime.min, Decimal('0.1'), Decimal('10.0'))
     debugDal.logPrice(TEST_ITEM.id, price2.price, price2.primePrice)
 
+    #DAL-12
     items = debugDal.notificationItems(test_email)
     assert len(items) == 1
     assert items[0] == TEST_ITEM
 
     debugDal.logPrice(TEST_ITEM2.id, price.price, price.primePrice)
     debugDal.createItem(TEST_ITEM3, test_email)
+    #DAL-13
     items = debugDal.notificationItems(test_email)
     
     assert len(items) == 2
@@ -258,6 +297,8 @@ SIMILAR2 = SimilarItem(2, "testurl2", 1, "simboi2", "ayy.jpg", 0.0)
 SIMILAR3 = SimilarItem(3, "testurl3", 1, "simboi3", "ayyy.jpg", 0.0)
 SIMILAR4 = SimilarItem(4, "testurl4", 2, "simboi4", "ayyyy.jpg", 0.0)
 
+#TODO 25
+#DAL-20,21,22,23,24,25
 def test_similar_items(debugDal):
     wipeDB(debugDal)
     test_email = INITIAL_USERS[0]["user"]
@@ -265,26 +306,48 @@ def test_similar_items(debugDal):
     debugDal.createItem(TEST_ITEM2, test_email)
 
     assert count(debugDal, "similaritem") == 0
+    #dal-23
     assert len(debugDal.similarItems(test_email, 1)) == 0
 
+    #DAL-20
     debugDal.registerSimilar(SIMILAR1)
     debugDal.registerSimilar(SIMILAR2)
     debugDal.registerSimilar(SIMILAR3)
     debugDal.registerSimilar(SIMILAR4)
 
+
+    #DAL-21
+    try:
+        debugDal.registerSimilar(SimilarItem(1, "testurl1", 1000, "simboi", "ay.jpg", 0.0))
+        assert False
+    except psycopg2.Error:
+        assert True
+
     assert count(debugDal, "similaritem") == 4
+    
+    #DAL-22
     similars = debugDal.similarItems(test_email, 1)
     assert len(similars) == 3
     assert similars[0] == SIMILAR1
     assert similars[1] == SIMILAR2
     assert similars[2] == SIMILAR3
 
+    #DAL-24
     assert debugDal.hideSimilar(3, test_email)
     similars = debugDal.similarItems(test_email, 1)
     assert len(similars) == 2
     assert similars[0] == SIMILAR1
     assert similars[1] == SIMILAR2
 
+
+    #DAL-25
+    try:
+        debugDal.hideSimilar(1000, 1)
+        assert False
+    except psycopg2.Error:
+        assert True
+
+#DAL-19
 def test_sort_order(debugDal):
     wipeDB(debugDal)
     test_email = INITIAL_USERS[0]["user"]
@@ -298,6 +361,7 @@ def test_sort_order(debugDal):
     assert items[1] == TEST_ITEM2
     assert items[2] == TEST_ITEM3
 
+    #DAL-19
     debugDal.updateSortOrder(test_email, [2, 3, 1])
 
     items = debugDal.userItems(test_email)
@@ -306,7 +370,7 @@ def test_sort_order(debugDal):
     assert items[1] == TEST_ITEM3
     assert items[2] == TEST_ITEM
 
-
+#DAL-26,27,28
 def test_scrape_items(debugDal):
     wipeDB(debugDal)
     test_email1 = INITIAL_USERS[0]["user"]
@@ -316,9 +380,12 @@ def test_scrape_items(debugDal):
     debugDal.createItem(TEST_ITEM3, test_email1)
 
     #should be both of them
+    #DAL-26
     items = debugDal.itemsToScrape(datetime(2020, 10, 25, 0, 0))
     assert len(items) == 3
+    #DAL-27
     items = debugDal.itemsToScrape(datetime(2020, 10, 26, 0, 0))
     assert len(items) == 2
+    #DAL-28
     items = debugDal.itemsToScrape(datetime(2020, 10, 25, 1, 0))
     assert len(items) == 1

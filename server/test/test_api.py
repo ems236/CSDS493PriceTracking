@@ -42,29 +42,34 @@ VALID_ITEM = {
         , "token": 1
     }
 
+#IAPI-1,2
 def test_insertitem(client):
+    #IAPI-2
     res = client.post("/item/register", 
                     data=json.dumps(BAD_JSON),
                     content_type='application/json')
     assert res.status_code == 422
 
+    #IAPI-1
     res = client.post("/item/register", 
                     data=json.dumps(VALID_ITEM),
                     content_type='application/json')
 
     checkStatus(res, True)
 
+#IAPI-5,6
 def test_updateitem(client):
     client.post("/item/register", 
                     data=json.dumps(VALID_ITEM),
                     content_type='application/json')
 
+    #IAPI-6
     res = client.put("/item/update/tracking", 
                     data=json.dumps(BAD_JSON),
                     content_type='application/json')
     assert res.status_code == 422
     
-
+    #IAPI-5
     updateItem = {
         "id": 1,
         "timeThreshold": datetime.now().isoformat(),
@@ -79,7 +84,7 @@ def test_updateitem(client):
 
     checkStatus(res, True)
 
-
+#IAPI-3
 def test_sortorder(client):
     client.post("/item/register", 
                     data=json.dumps(VALID_ITEM),
@@ -99,7 +104,7 @@ def test_sortorder(client):
                     content_type='application/json')
     assert res.status_code == 422
 
-
+    #IAPI-3
     updateSort = {
         "itemIds": [1]
         , "token": 1
@@ -111,7 +116,7 @@ def test_sortorder(client):
 
     checkStatus(res, True)
 
-
+#IAPI-4
 def test_deleteitem(client):
     client.post("/item/register", 
                     data=json.dumps(VALID_ITEM),
@@ -130,6 +135,7 @@ def test_deleteitem(client):
                     content_type='application/json')
     assert res.status_code == 422
 
+    #IAPI-4
     deleteItem = {
         "id": 1
         , "token": 1
@@ -141,7 +147,7 @@ def test_deleteitem(client):
 
     checkStatus(res, True)
 
-
+#IAPI-11
 def test_notifyitem(client):
     res = client.get("/notify/items",
                     data=json.dumps({"token": 1}),
@@ -168,8 +174,9 @@ def test_notifyitem(client):
     items = res.json["items"]
     assert len(items) == 1
 
-
+#IAPI-12,13,14
 def test_getsetPrime(client):
+    #IAPI-14
     res = client.put("/user/setprime", 
                     data=json.dumps({"isPrime": 1
                     , "token":1
@@ -184,6 +191,7 @@ def test_getsetPrime(client):
                     content_type='application/json')
     assert res.status_code == 422
 
+    #IAPI-13
     res = client.put("/user/setprime", 
                     data=json.dumps({"isPrime": True
                     , "token":1
@@ -191,6 +199,7 @@ def test_getsetPrime(client):
                     content_type='application/json')
     checkStatus(res, True)
     
+    #IAPI-12
     res = client.get("/user/isprime", 
                     data=json.dumps({"token": 1}),
                     content_type='application/json')
@@ -209,7 +218,9 @@ VALID_SIMILAR_ITEM = {
     "token": 1
 }
 
+#IAPI-7,8
 def test_registerSimilar(client):
+    #IAPI-8
     client.post("/item/register", 
                     data=json.dumps(VALID_ITEM),
                     content_type='application/json')
@@ -219,12 +230,14 @@ def test_registerSimilar(client):
                     content_type='application/json')
     assert res.status_code == 422
 
+    #IAPI-7
     res = client.post("/similar/register", 
                     data=json.dumps(VALID_SIMILAR_ITEM),
                     content_type='application/json')
 
     checkStatus(res, True)
 
+#IAPI-9,10
 def test_hideSimilar(client):
     client.post("/item/register", 
                     data=json.dumps(VALID_ITEM),
@@ -232,12 +245,12 @@ def test_hideSimilar(client):
     client.post("/similar/register", 
                     data=json.dumps(VALID_SIMILAR_ITEM),
                     content_type='application/json')
-
     res = client.post("/similar/hide", 
                     data=json.dumps(BAD_JSON),
                     content_type='application/json')
     assert res.status_code == 422
 
+    #IAPI-10
     badDelete = {"id": -1
                     , "token":1
     }
@@ -246,6 +259,7 @@ def test_hideSimilar(client):
                     content_type='application/json')
     assert res.status_code == 422
 
+    #IAPI-9
     deleteItem = {
         "id": 1
                     , "token":1
