@@ -5,8 +5,11 @@
     <script src="js/jquery.min.js"></script>
     <script src="js/popper.min.js"></script>
     <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/jquery-ui.css">
     <script src="js/bootstrap.min.js"></script>
-    <script src="js/popup.js"></script>
+    <script src="js/TrackingItem.js"></script>
+    <script src="js/Chart.min.js"></script>
+    <script src="js/jquery-ui.js"></script>
   </head>
   <style type="text/css">
     body {
@@ -18,6 +21,13 @@
 
     ::-webkit-scrollbar {
       display: none;
+    }
+
+    /* Fix img height for every card */
+    .card-img-top {
+      width: 100%;
+      height: 50vw;
+      object-fit: cover;
     }
 
   </style>
@@ -37,12 +47,10 @@
     <div class="tab-content">
       <div class="tab-pane fade show active" id="item1" role="tabpanel" aria-labelledby="item1-tab">
         <div id="demo" class="carousel slide" data-ride="carousel" data-interval="false">
-
           <!-- Indicators -->
           <ul class="carousel-indicators">
             <li data-target="#demo" data-slide-to="0" class="active" id="indicators"></li>
           </ul>
-
           <!-- The slideshow -->
           <div class="carousel-inner">
             <div class="carousel-item active" id="activeItem">
@@ -51,11 +59,11 @@
                   <a href="#" id="card-link-title-1" target="_blank">
                     <img class="card-img-top" src="..." alt="Card image cap" id="img-card1">
                   </a>
-                  <div class="card-body">
+                  <div class="card-body" style="text-align:center">
                     <h5 class="card-title" id="card-title1">Card title</h5>
                     <p class="card-text">
                       Current Price:
-                      <span id="current-price-card1">
+                      <span class="card-price" id="current-price-card1">
                         ---
                       </span>
                       Lowest Price:
@@ -64,17 +72,38 @@
                       </span>
                       <h6>Shipping included, if any</h6>
                     </p>
+                    <!-- trigger modal -->
+                    <a data-toggle="modal" href="#detailModal" class="card-link" id="card-link-footer-1">Detail</a>
+                    <p></p>
+                    <a data-toggle="modal" href="#deleteModal-1" class="card-link" id="card-link-delete-1">Delete</a>
+                    <!-- Modal for delete-->
+                    <div class="modal" id="deleteModal-1" tabindex="-1" role="dialog" aria-hidden="true">
+                      <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title">Confirm delete</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                          </div>
+                          <div class="modal-body">
+                            <p>Delete this item from the product list?</p>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" name="delete-btn">Delete</button>
+                            <button type="button" class="btn btn-secondary" name="cancel-btn" data-dismiss="modal">Cancel</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div class="card-footer">
+                  <div class="card-footer" style="text-align:center">
                     <small class="text-muted">Last updated 3 mins ago</small>
-                    <a href="#" class="card-link" id="card-link-footer-1" target="_blank">Detail</a>
-                    <a href="#" class="card-link">Delete</a>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-
           <!-- Left and right controls -->
           <a class="carousel-control-prev" href="#demo" data-slide="prev">
             <span class="carousel-control-prev-icon"></span>
@@ -83,15 +112,184 @@
             <span class="carousel-control-next-icon"></span>
           </a>
         </div>
-
       </div>
       <div class="tab-pane fade" id="item2" role="tabpanel" aria-labelledby="item2-tab">
+        <div id="similarItems" class="carousel slide" data-ride="carousel" data-interval="false">
+          <!-- Indicators -->
+          <ul class="carousel-indicators" id="carousel-indicators-similar">
+            <li data-target="#similarItems" data-slide-to="0" class="active" id="indicators2"></li>
+          </ul>
+          <!-- The slideshow -->
+          <div class="carousel-inner" id="carousel-inner-similar">
+            <div class="carousel-item active">
+              <div class="card-group" id="card-group-similar1">
+                <div class="card" id="card-similar1">
+                  <a href="#" id="card-link-similar-1" target="_blank">
+                    <img class="card-img-top" src="..." alt="Card image cap" id="img-card-similar1">
+                  </a>
+                  <div class="card-body" style="text-align:center">
+                    <h5 class="card-title" id="card-title-similar1">Card title</h5>
+                    <p class="card-text">
+                      Current Price:
+                      <span class="card-price" id="current-price-card-similar1">
+                        ---
+                      </span>
+                      <button type="button" class="btn btn-primary" name="register-btn">Register</button>
+                  </div>
+                  <div class="card-footer" style="text-align:center">
+                    <small class="text-muted">Last updated 3 mins ago</small>
+                    <button type="button" class="btn btn-secondary" name="hide-btn">Hide this item</button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+          <!-- Left and right controls -->
+          <a class="carousel-control-prev" href="#similarItems" data-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+          </a>
+          <a class="carousel-control-next" href="#similarItems" data-slide="next">
+            <span class="carousel-control-next-icon"></span>
+          </a>
+        </div>
+
       </div>
       <div class="tab-pane fade" id="item3" role="tabpanel" aria-labelledby="item3-tab">
+        <div class="card">
+          <div class="card-body">
+            <span>Sort order for the tracked products:</span>
+            <select name="sort-order" id="sort-order">
+              <option value="1" selected="selected">Price</option>
+              <option value="2">Product Name</option>
+              <option value="3">Time Threshold</option>
+            </select>
+            <select name="sort-order" id="sort-order-asc-desc">
+              <option value="1" selected="selected">Descending</option>
+              <option value="2">Ascending</option>
+            </select>
+            <br>
+            <p></p>
+            <span>Prime Consideration</span>
+            <label><input name="prime" type="radio" value="1" />On</label>
+            <label><input name="prime" type="radio" value="2" />Off</label>
+
+          </div>
+          <div class="card-footer" style="text-align:right">
+            <button type="button" class="btn btn-primary">Save</button>
+          </div>
+        </div>
       </div>
     </div>
-  </body>
+    <!-- Modal for detail -->
+    <div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="ModalTitle" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="ModalTitle">Detail</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <label><input id="rdb1" type="radio" name="toggler" value="1" />View Graph</label>
+            <label><input id="rdb2" type="radio" name="toggler" value="2" />View Table</label>
+            <div id="blk-1" class="toHide" style="display:none">
+              <div class="row my-3">
+                <div class="col">
+                  <h4>Price History</h4>
+                </div>
+              </div>
+              <div class="row my-2">
+                <div class="col-md-12">
+                  <div class="card">
+                    <div class="card-body">
+                      <canvas id="chLine" height="150"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="blk-2" class="toHide" style="display:none">
+              <table class="table">
+                <thead class="thead-dark">
+                  <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Item</th>
+                    <th scope="col">Similar Item 1</th>
+                    <th scope="col">Similar Item 2</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">Nov-1</th>
+                    <td>$639</td>
+                    <td>$525</td>
+                    <td>$799</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Nov-2</th>
+                    <td>$465</td>
+                    <td>$786</td>
+                    <td>$899</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Nov-3</th>
+                    <td>$493</td>
+                    <td>$346</td>
+                    <td>$900</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Nov-4</th>
+                    <td>$524</td>
+                    <td>$700</td>
+                    <td>$435</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Nov-5</th>
+                    <td>$735</td>
+                    <td>$768</td>
+                    <td>$589</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Nov-6</th>
+                    <td>$760</td>
+                    <td>$542</td>
+                    <td>$200</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Nov-7</th>
+                    <td>$674</td>
+                    <td>$346</td>
+                    <td>$300</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              Price Threshold:
+              <input type="text" id="pthres" value="$100" readonly="true" />
+            </p>
+            <p>
+              Time Threshold:
+              <input type="text" id="tthres" value="11/10/2020" readonly="true" />
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="modifyThresButton">Modify Threholds</button>
+            <button type="button" class="btn btn-primary" id="saveThresButton" disabled>Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
+  </body>
   <script src="js/generate-page.js"></script>
+  <script src="js/generate-similar-items.js"></script>
+  <script src="js/popup.js"></script>
+  <script src="js/mock-ajax.js"></script>
+  <script src="js/sortOrder.js"></script>
+  <script src="js/saveOptions.js"></script>
+  <script src="js/buttonAction.js"></script>
 
 </html>
