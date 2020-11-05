@@ -9,13 +9,58 @@ def test_production_conn():
 
 #compare eq for that coverage
 def test_bad_eq():
-    x = TrackingItem.fromFrontEnd("testurl", "imgurl", "myitem", Decimal('1.25'), datetime.now(), TrackingItem.SAMPLE_DAY)
-    y = SimilarItem("a", 1, "none", "b")
+    x = TrackingItem.fromDBRecord(1, "testurl", "imgurl", "myitem", Decimal('1.25'), datetime.now(), TrackingItem.SAMPLE_DAY)
+    y = SimilarItem(1, "a", 1, "none", "b", 0.0)
     z = LoggedPrice(datetime.now(), Decimal('1'), Decimal('2'))
 
     assert not x == y
     assert not y == x
     assert not z == x
+
+
+def test_item_from_dict():
+    VALID_ITEM = {
+        "url": "testurl",
+        "imgUrl": "imgtest",
+        "title": "amazonitem",
+        "timeThreshold": datetime.now().isoformat(),
+        "priceThreshold": "51.2",
+        "sampleFrequency": 1
+    }
+
+    testItem = TrackingItem.fromDict(None, TrackingItem.isValidInsert)
+    assert testItem is None
+
+    testItem = TrackingItem.fromDict(VALID_ITEM, TrackingItem.isValidInsert)
+    assert testItem is not None
+
+    VALID_ITEM["priceThreshold"] = "hello"
+    testItem = TrackingItem.fromDict(VALID_ITEM, TrackingItem.isValidInsert)
+    assert testItem is None
+
+def test_similar_from_dict():
+    VALID_SIMILAR_ITEM = {
+        "itemUrl": "someUrl",
+        "imgUrl": "somejpeg",
+        "name": "mysimilar",
+        "referrerItemId": 1,
+        "price": "12.5"
+    }
+
+    testItem = SimilarItem.fromDict(None)
+    assert testItem is None
+
+    testItem = SimilarItem.fromDict(VALID_SIMILAR_ITEM)
+    assert testItem is not None
+
+    VALID_SIMILAR_ITEM["price"] = "-1.5"
+    testItem = SimilarItem.fromDict(VALID_SIMILAR_ITEM)
+    assert testItem is None
+
+    VALID_SIMILAR_ITEM["price"] = "hello"
+    testItem = SimilarItem.fromDict(VALID_SIMILAR_ITEM)
+    assert testItem is None
+
 
 INITIAL_USERS = [
         {"user":"ems236@case.edu"}
@@ -208,10 +253,10 @@ def test_notification_items(debugDal):
     assert items[1] == TEST_ITEM3
 
 
-SIMILAR1 = SimilarItem("testurl1", 1, "simboi", "ay.jpg")
-SIMILAR2 = SimilarItem("testurl2", 1, "simboi2", "ayy.jpg")
-SIMILAR3 = SimilarItem("testurl3", 1, "simboi3", "ayyy.jpg")
-SIMILAR4 = SimilarItem("testurl4", 2, "simboi4", "ayyyy.jpg")
+SIMILAR1 = SimilarItem(1, "testurl1", 1, "simboi", "ay.jpg", 0.0)
+SIMILAR2 = SimilarItem(2, "testurl2", 1, "simboi2", "ayy.jpg", 0.0)
+SIMILAR3 = SimilarItem(3, "testurl3", 1, "simboi3", "ayyy.jpg", 0.0)
+SIMILAR4 = SimilarItem(4, "testurl4", 2, "simboi4", "ayyyy.jpg", 0.0)
 
 def test_similar_items(debugDal):
     wipeDB(debugDal)
@@ -253,7 +298,7 @@ def test_sort_order(debugDal):
     assert items[1] == TEST_ITEM2
     assert items[2] == TEST_ITEM3
 
-    debugDal.updateSortOrder(test_email, [1, 2, 3], [3, 1, 2])
+    debugDal.updateSortOrder(test_email, [2, 3, 1])
 
     items = debugDal.userItems(test_email)
     assert len(items) == 3

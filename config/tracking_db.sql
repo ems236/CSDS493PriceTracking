@@ -58,7 +58,8 @@ CREATE TABLE public.similaritem (
     itemid integer,
     productname character varying(150),
     producturl character varying(150),
-    imageurl character varying(150)
+    imageurl character varying(150),
+    price numeric(12,2)
 );
 
 
@@ -173,7 +174,7 @@ COPY public.pricelog (id, itemid, price, primeprice, logdate) FROM stdin;
 -- Data for Name: similaritem; Type: TABLE DATA; Schema: public; Owner: webappuser
 --
 
-COPY public.similaritem (id, itemid, productname, producturl, imageurl) FROM stdin;
+COPY public.similaritem (id, itemid, productname, producturl, imageurl, price) FROM stdin;
 \.
 
 
@@ -294,18 +295,26 @@ ALTER TABLE ONLY public.user_trackingitem
 
 
 --
--- Name: similaritem fk_item; Type: FK CONSTRAINT; Schema: public; Owner: webappuser
---
-
-ALTER TABLE ONLY public.similaritem
-    ADD CONSTRAINT fk_item FOREIGN KEY (itemid) REFERENCES public.trackingitem(id) ON DELETE CASCADE;
-
-
---
 -- Name: pricelog fk_item; Type: FK CONSTRAINT; Schema: public; Owner: webappuser
 --
 
 ALTER TABLE ONLY public.pricelog
+    ADD CONSTRAINT fk_item FOREIGN KEY (itemid) REFERENCES public.trackingitem(id) ON DELETE CASCADE;
+
+
+--
+-- Name: user_trackingitem fk_item; Type: FK CONSTRAINT; Schema: public; Owner: webappuser
+--
+
+ALTER TABLE ONLY public.user_trackingitem
+    ADD CONSTRAINT fk_item FOREIGN KEY (itemid) REFERENCES public.trackingitem(id) ON DELETE CASCADE;
+
+
+--
+-- Name: similaritem fk_item; Type: FK CONSTRAINT; Schema: public; Owner: webappuser
+--
+
+ALTER TABLE ONLY public.similaritem
     ADD CONSTRAINT fk_item FOREIGN KEY (itemid) REFERENCES public.trackingitem(id) ON DELETE CASCADE;
 
 
@@ -318,11 +327,11 @@ ALTER TABLE ONLY public.user_similar_item
 
 
 --
--- Name: user_trackingitem fk_item; Type: FK CONSTRAINT; Schema: public; Owner: webappuser
+-- Name: user_trackingitem fk_user; Type: FK CONSTRAINT; Schema: public; Owner: webappuser
 --
 
 ALTER TABLE ONLY public.user_trackingitem
-    ADD CONSTRAINT fk_item FOREIGN KEY (itemid) REFERENCES public.trackingitem(id) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_user FOREIGN KEY (userid) REFERENCES public.trackinguser(id) ON DELETE CASCADE;
 
 
 --
@@ -330,14 +339,6 @@ ALTER TABLE ONLY public.user_trackingitem
 --
 
 ALTER TABLE ONLY public.user_similar_item
-    ADD CONSTRAINT fk_user FOREIGN KEY (userid) REFERENCES public.trackinguser(id) ON DELETE CASCADE;
-
-
---
--- Name: user_trackingitem fk_user; Type: FK CONSTRAINT; Schema: public; Owner: webappuser
---
-
-ALTER TABLE ONLY public.user_trackingitem
     ADD CONSTRAINT fk_user FOREIGN KEY (userid) REFERENCES public.trackinguser(id) ON DELETE CASCADE;
 
 

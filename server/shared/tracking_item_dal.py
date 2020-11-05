@@ -275,10 +275,11 @@ class TrackingItemDAL:
         userId = self.userForEmail(userEmail)
 
         SIMILAR_SQL = """
-        SELECT s.productUrl, s.itemId, s.productName, s.imageUrl
+        SELECT s.id, s.productUrl, s.itemId, s.productName, s.imageUrl, s.price
         FROM similaritem s
         WHERE s.itemId = %(itemId)s
             AND NOT EXISTS (SELECT 1 FROM user_similar_item us WHERE us.userId = %(userId)s AND us.similarid = s.id)
+        ORDER BY s.id
         """
 
         SIMILAR_PARAMS = {
@@ -289,7 +290,7 @@ class TrackingItemDAL:
         return self.run_sql(SIMILAR_SQL, SIMILAR_PARAMS, cursor_read_similar_items)
 
 
-    def updateSortOrder(self, userEmail: str, itemIds: list, sortOrder: list):
+    def updateSortOrder(self, userEmail: str, itemIds: list):
         userId = self.userForEmail(userEmail)
         UPDATE_SQL = """
         UPDATE user_trackingitem
@@ -306,10 +307,10 @@ class TrackingItemDAL:
         isSuccess = True
 
         count = len(itemIds)
-        counter = 0
-        while isSuccess and counter < count:
-            update_params["itemId"] = itemIds[counter]
-            update_params["sortOrder"] = sortOrder[counter]
+        counter = 1
+        while isSuccess and counter <= count:
+            update_params["itemId"] = itemIds[counter - 1]
+            update_params["sortOrder"] = counter
             isSuccess = isSuccess and self.run_sql(UPDATE_SQL, update_params) 
             counter += 1
 
@@ -319,16 +320,17 @@ class TrackingItemDAL:
     def registerSimilar(self, item: SimilarItem):
         SIMILAR_SQL = """
         INSERT INTO similaritem
-        (itemId, productName, productUrl, imageUrl)
+        (itemId, productName, productUrl, imageUrl, price)
         VALUES
-        (%(itemId)s, %(productName)s, %(productUrl)s, %(imageUrl)s)
+        (%(itemId)s, %(productName)s, %(productUrl)s, %(imageUrl)s, %(price)s)
         """
         
         SIMILAR_PARAMS = {
             "itemId": item.referrerItemId,
             "productName": item.name,
             "productUrl": item.itemUrl,
-            "imageUrl": item.imgUrl
+            "imageUrl": item.imgUrl,
+            "price": item.price
         }
 
         return self.run_sql(SIMILAR_SQL, SIMILAR_PARAMS)
