@@ -22,7 +22,7 @@ console.log("similar-item.js");
         card += "            <span class = \"card-price\" id=\"current-price-card-similar" + i + "\">";
         card += "            ---";
         card += "            </span>";
-		card += "            <button type=\"button\" class=\"btn btn-primary\" name=\"register-btn\">Register</button>";
+	card += "            <button type=\"button\" class=\"btn btn-primary\" name=\"register-btn\">Register</button>";
         card += "         </p>";
         card += "      </div>";
         card += "      <div class=\"card-footer\" style=\"text-align:center\">";
