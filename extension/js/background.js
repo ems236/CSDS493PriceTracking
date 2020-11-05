@@ -33,8 +33,12 @@ console.log(url);
 //see https://medium.com/swlh/oauth2-openid-chrome-extension-login-system-29285323882f  
 // and https://stackoverflow.com/questions/26256179/is-it-possible-to-get-an-id-token-with-chrome-app-indentity-api/32548057#32548057
 
+console.log("adding listener")
 
-chrome.identity.launchWebAuthFlow(
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  console.log("got message");
+  if (request.message === 'login') {
+    chrome.identity.launchWebAuthFlow(
     {
         'url': url, 
         'interactive':true
@@ -43,15 +47,21 @@ chrome.identity.launchWebAuthFlow(
         console.log(redirect_url);
         if (chrome.runtime.lastError) {
             console.log(chrome.runtime.lastError.message);
+            sendResponse({"success": false})
         }
         else {
             let id_token = redirect_url.substring(redirect_url.indexOf('id_token=') + 9);
             id_token = id_token.substring(0, id_token.indexOf('&'));
             console.log(id_token);
+            sendResponse({"success": true, "token": id_token});
             console.log(redirect_url);
         }
     }
-);
+  );
+
+    return true;
+  }
+});
 
   chrome.runtime.onInstalled.addListener(function() {
     chrome.storage.sync.set({color: '#3aa757'}, function() {
