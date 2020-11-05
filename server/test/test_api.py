@@ -39,10 +39,6 @@ VALID_ITEM = {
         "sampleFrequency": 1
     }
 
-SIMILAR_ITEM = {
-
-}
-
 def test_insertitem(client):
     res = client.post("/item/register", 
                     data=json.dumps(BAD_JSON),

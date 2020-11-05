@@ -17,6 +17,51 @@ def test_bad_eq():
     assert not y == x
     assert not z == x
 
+
+def test_item_from_dict():
+    VALID_ITEM = {
+        "url": "testurl",
+        "imgUrl": "imgtest",
+        "title": "amazonitem",
+        "timeThreshold": datetime.now().isoformat(),
+        "priceThreshold": "51.2",
+        "sampleFrequency": 1
+    }
+
+    testItem = TrackingItem.fromDict(None, TrackingItem.isValidInsert)
+    assert testItem is None
+
+    testItem = TrackingItem.fromDict(VALID_ITEM, TrackingItem.isValidInsert)
+    assert testItem is not None
+
+    VALID_ITEM["priceThreshold"] = "hello"
+    testItem = TrackingItem.fromDict(VALID_ITEM, TrackingItem.isValidInsert)
+    assert testItem is None
+
+def test_similar_from_dict():
+    VALID_SIMILAR_ITEM = {
+        "itemUrl": "someUrl",
+        "imgUrl": "somejpeg",
+        "name": "mysimilar",
+        "referrerItemId": 1,
+        "price": "12.5"
+    }
+
+    testItem = SimilarItem.fromDict(None)
+    assert testItem is None
+
+    testItem = SimilarItem.fromDict(VALID_SIMILAR_ITEM)
+    assert testItem is not None
+
+    VALID_SIMILAR_ITEM["price"] = "-1.5"
+    testItem = SimilarItem.fromDict(VALID_SIMILAR_ITEM)
+    assert testItem is None
+
+    VALID_SIMILAR_ITEM["price"] = "hello"
+    testItem = SimilarItem.fromDict(VALID_SIMILAR_ITEM)
+    assert testItem is None
+
+
 INITIAL_USERS = [
         {"user":"ems236@case.edu"}
         , {"user":"ellis.saupe@gmail.com"}

@@ -2,9 +2,6 @@ import datetime
 import dateutil.parser
 import decimal
 
-def isValidString(prop, maxlen):
-    return isinstance(prop, str) and len(prop) < maxlen
-
 class TrackingItem:
     def __init__(self, id, url, imgUrl, title, priceThreshold, timeThreshold, sampleFrequency, priceHistory):
         self.id = id
