@@ -29,7 +29,10 @@
 	    // Register Track item 
 	    "Track item": function() {
 	      var url = window.location.href;   // Get item url
-	      var url = url.substring(0, url.indexOf("/ref"));  // Trim item url
+	      // fix url that don't contain /ref field
+              if (url.includes("/ref")) {
+                url = url.substring(0, url.indexOf("/ref"));  // Trim item url
+              }
               var imgUrl = document.getElementById("landingImage").getAttribute("src"); // Get img url
 	      var title = document.getElementById("productTitle").innerHTML.trim(); // Get item title
 	      var timeThreshold = document.getElementById("datepicker").value; // Get time threshold
