@@ -56,6 +56,7 @@
             <div class="carousel-item active" id="activeItem">
               <div class="card-group" id="card-group-1">
                 <div class="card" id="card1">
+				  <input type="hidden" name="itemId" id="itemId-1">
                   <a href="#" id="card-link-title-1" target="_blank">
                     <img class="card-img-top" src="..." alt="Card image cap" id="img-card1">
                   </a>
@@ -73,7 +74,118 @@
                       <h6>Shipping included, if any</h6>
                     </p>
                     <!-- trigger modal -->
-                    <a data-toggle="modal" href="#detailModal" class="card-link" id="card-link-footer-1">Detail</a>
+                    <a data-toggle="modal" href="#detail-modal-1" class="card-link" id="card-link-footer-1">Detail</a>
+                    <!-- Modal for detail -->
+                    <div class="modal fade" name="detail-modal" id="detail-modal-1" tabindex="-1" role="dialog" aria-labelledby="ModalTitle" aria-hidden="true">
+                      <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title">Detail</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                          </div>
+                          <div class="modal-body">
+                            <label><input type="radio" name="toggler" value="1" />View Graph</label>
+                            <label><input type="radio" name="toggler" value="2" />View Table</label>
+                            <div name="blk-1" class="toHide" style="display:none">
+                              <div class="row my-3">
+                                <div class="col">
+                                  <h4>Price History</h4>
+                                </div>
+                              </div>
+                              <div class="row my-2">
+                                <div class="col-md-12">
+                                  <div class="card">
+                                    <div class="card-body">
+                                      <canvas id="chLine" height="150"></canvas>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div name="blk-2" class="toHide" style="display:none">
+                              <table class="table">
+                                <thead class="thead-dark">
+                                  <tr>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Item</th>
+                                    <th scope="col">Similar Item 1</th>
+                                    <th scope="col">Similar Item 2</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr>
+                                    <th scope="row">Nov-1</th>
+                                    <td>$639</td>
+                                    <td>$525</td>
+                                    <td>$799</td>
+                                  </tr>
+                                  <tr>
+                                    <th scope="row">Nov-2</th>
+                                    <td>$465</td>
+                                    <td>$786</td>
+                                    <td>$899</td>
+                                  </tr>
+                                  <tr>
+                                    <th scope="row">Nov-3</th>
+                                    <td>$493</td>
+                                    <td>$346</td>
+                                    <td>$900</td>
+                                  </tr>
+                                  <tr>
+                                    <th scope="row">Nov-4</th>
+                                    <td>$524</td>
+                                    <td>$700</td>
+                                    <td>$435</td>
+                                  </tr>
+                                  <tr>
+                                    <th scope="row">Nov-5</th>
+                                    <td>$735</td>
+                                    <td>$768</td>
+                                    <td>$589</td>
+                                  </tr>
+                                  <tr>
+                                    <th scope="row">Nov-6</th>
+                                    <td>$760</td>
+                                    <td>$542</td>
+                                    <td>$200</td>
+                                  </tr>
+                                  <tr>
+                                    <th scope="row">Nov-7</th>
+                                    <td>$674</td>
+                                    <td>$346</td>
+                                    <td>$300</td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                            <p>
+                              Price Threshold:
+                              <input type="text" name="pthres" id="pthres-1" value="$100" readonly="true" />
+                            </p>
+                            <p>
+                              Time Threshold:
+                              <input type="text" name="tthres" id="tthres-1" value="11/10/2020" readonly="true" />
+                            </p>
+
+                            <p>
+                              Sample Frequency:
+                              <select name="rate" id="rate-1" disabled>
+                                <option value="1">Hourly</option>
+                                <option value="2">Daily</option>
+                                <option value="3">Monthly</option>
+                              </select>
+                            </p>
+
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" name="modifyThresButton" id="test1">Modify Threholds</button>
+                            <button type="button" class="btn btn-primary" name="saveThresButton" disabled>Save</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                     <p></p>
                     <a data-toggle="modal" href="#deleteModal-1" class="card-link" id="card-link-delete-1">Delete</a>
                     <!-- Modal for delete-->
@@ -171,123 +283,24 @@
             <br>
             <p></p>
             <span>Prime Consideration</span>
-            <label><input name="prime" type="radio" value="1" />On</label>
-            <label><input name="prime" type="radio" value="2" />Off</label>
+            <label><input name="prime" id="isPrime" type="radio" value="1" />On</label>
+            <label><input name="prime" id="isNotPrime" type="radio" value="2" />Off</label>
 
           </div>
           <div class="card-footer" style="text-align:right">
-            <button type="button" class="btn btn-primary">Save</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Modal for detail -->
-    <div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="ModalTitle" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="ModalTitle">Detail</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <label><input id="rdb1" type="radio" name="toggler" value="1" />View Graph</label>
-            <label><input id="rdb2" type="radio" name="toggler" value="2" />View Table</label>
-            <div id="blk-1" class="toHide" style="display:none">
-              <div class="row my-3">
-                <div class="col">
-                  <h4>Price History</h4>
-                </div>
-              </div>
-              <div class="row my-2">
-                <div class="col-md-12">
-                  <div class="card">
-                    <div class="card-body">
-                      <canvas id="chLine" height="150"></canvas>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div id="blk-2" class="toHide" style="display:none">
-              <table class="table">
-                <thead class="thead-dark">
-                  <tr>
-                    <th scope="col">Date</th>
-                    <th scope="col">Item</th>
-                    <th scope="col">Similar Item 1</th>
-                    <th scope="col">Similar Item 2</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <th scope="row">Nov-1</th>
-                    <td>$639</td>
-                    <td>$525</td>
-                    <td>$799</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">Nov-2</th>
-                    <td>$465</td>
-                    <td>$786</td>
-                    <td>$899</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">Nov-3</th>
-                    <td>$493</td>
-                    <td>$346</td>
-                    <td>$900</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">Nov-4</th>
-                    <td>$524</td>
-                    <td>$700</td>
-                    <td>$435</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">Nov-5</th>
-                    <td>$735</td>
-                    <td>$768</td>
-                    <td>$589</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">Nov-6</th>
-                    <td>$760</td>
-                    <td>$542</td>
-                    <td>$200</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">Nov-7</th>
-                    <td>$674</td>
-                    <td>$346</td>
-                    <td>$300</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <p>
-              Price Threshold:
-              <input type="text" id="pthres" value="$100" readonly="true" />
-            </p>
-            <p>
-              Time Threshold:
-              <input type="text" id="tthres" value="11/10/2020" readonly="true" />
-            </p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary" id="modifyThresButton">Modify Threholds</button>
-            <button type="button" class="btn btn-primary" id="saveThresButton" disabled>Save</button>
+            <button type="button" class="btn btn-primary" id="save-pref-btn">Save</button>
           </div>
         </div>
       </div>
     </div>
 
+
+    <!--Holder for token id-->
+    <input type="hidden" id="tokenId" name="tokenId">
   </body>
   <script src="js/generate-page.js"></script>
   <script src="js/generate-similar-items.js"></script>
   <script src="js/popup.js"></script>
-  <script src="js/mock-ajax.js"></script>
   <script src="js/sortOrder.js"></script>
   <script src="js/saveOptions.js"></script>
   <script src="js/buttonAction.js"></script>
