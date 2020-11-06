@@ -2,7 +2,14 @@
     "name": "Online Price Tracker",
     "version": "1.0",
     "description": "Online price tracking extension for Amazon products.",
-    "permissions": ["activeTab", "declarativeContent", "storage", "https://www.amazon.com/*"],
+    "permissions": ["activeTab", "declarativeContent", "storage", "https://www.amazon.com/*", "identity"],
+    "oauth2": {
+      "client_id": "421234127272-3bb34j7akcuuklsafvc6cuv757jd0870.apps.googleusercontent.com",
+      "scopes": [
+        "openid", "email", "profile"
+      ]
+    },
+    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAi7kfD0GR3wV6ITjG9HRWrHds25A8sxhPrUXMolR6AmWFmipt3g7Fru1OwAsQMn50oI7UP+9ddGsAHVQvgeCbWSlpiSXxxKJZcUDvOy1ciGNUGX//NDrkJ2ZwuEjVGWr94oUoK+GVkqaIBf4OqTvfNnGvxqv4Z4tZ2CXBRrZAhD5z8geyKwAd5vbzxGRWrlHF7tlsvlbiWYOGGlbuWEaagZgPVGnpydsfuSGUH3ND6vgk7si7bz/ujRA3WS18XMJYuF3sbrisqVSO9g73OtnhQqSDKdT7x5v4b35yoyvdVGimBxtQeR+ygRVb3BI5eYpudu2ecb7OrTxjt61SEvsOwwIDAQAB",
     "background": {
       "scripts": ["js/jquery.min.js","js/background.js"],
       "persistent": false

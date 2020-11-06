@@ -1,5 +1,5 @@
 import pytest 
-from .related_item_scraper import related_item_scraper
+from server.shared.related_item_scraper import related_item_scraper
 
 def test_no_related_items():
     assert related_item_scraper('https://www.amazon.com/Manfrotto-MTPIXI-WH-PIXI-Tripod-White/dp/B00G88UND8XM') == []

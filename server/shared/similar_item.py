@@ -43,6 +43,15 @@ class SimilarItem:
         else:
             return None
 
+    def toDict(self):
+        return {
+            "id": self.id,
+            "itemUrl": self.itemUrl,
+            "referrerItemId": self.referrerItemId,
+            "name": self.name,
+            "imgUrl": self.imgUrl,
+            "price": str(self.price)
+        }
 
     def __eq__(self, other):
         if isinstance(other, SimilarItem):

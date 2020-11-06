@@ -101,3 +101,24 @@ class TrackingItem:
                 and self.sampleFrequency == other.sampleFrequency
                 and self.priceHistory == other.priceHistory)
         return False
+
+    def toDict(self):
+        itemDict = {
+            "id": self.id,
+            "priceThreshold": str(self.priceThreshold),
+            "timeThreshold": self.timeThreshold.isoformat(),
+            "url": self.url,
+            "imgUrl": self.imgUrl,
+            "title":self.title,
+            "sampleFrequency":self.sampleFrequency,
+            "priceHistory":[]
+        }
+        for price in self.priceHistory:
+            priceDict = {
+                "date": price.date.isoformat(),
+                "price": str(price.price),
+                "primePrice": str(price.primePrice)
+            }
+            itemDict["priceHistory"].append(priceDict)
+
+        return itemDict
