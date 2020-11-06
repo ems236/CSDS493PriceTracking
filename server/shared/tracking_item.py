@@ -110,6 +110,7 @@ class TrackingItem:
             "url": self.url,
             "imgUrl": self.imgUrl,
             "title":self.title,
+            "sampleFrequency":self.sampleFrequency,
             "priceHistory":[]
         }
         for price in self.priceHistory:

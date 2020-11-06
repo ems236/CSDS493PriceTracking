@@ -308,6 +308,7 @@ def test_getItems(client):
     
     assert res.status_code == 200
     assert res.json is not None and "items" in res.json and len(res.json["items"]) == 1
+    assert "sampleFrequency" in res.json["items"][0]
 
 
 #IC-3
