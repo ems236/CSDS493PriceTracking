@@ -56,7 +56,7 @@ $(document).on('click',"[name=saveThresButton]",function(){
     data:JSON.stringify({
       "id": parseInt($(id).val()),
       "timeThreshold": $(tthres).val(),
-      "priceThreshold": parseInt(pthresNum),
+      "priceThreshold": pthresNum,
       "sampleFrequency": parseInt((rate).val()),
 	  "token": $("#tokenId").val()
     }),
@@ -79,14 +79,13 @@ $(document).on('click',"[name=saveThresButton]",function(){
 $(document).on('click',"#save-pref-btn",function(){
   //alert("save btn clicked");
   var radios = document.getElementsByName('prime');
-  var isPrime = 0;
+  var isPrime = Boolean(false);
   
   if (radios[0].checked) {
-    isPrime = 1;
-  }
+    isPrime = Boolean(true);
+  } 
   
-  alert("Successfully updated information.");
-  /*$.ajax({
+  $.ajax({
     url: "http://localhost:5000/user/setprime",
     type: "PUT",
     contentType: "application/json",
@@ -94,6 +93,9 @@ $(document).on('click',"#save-pref-btn",function(){
       "isPrime": isPrime, 
       "token":  $("#tokenId").val()
     }),
+	beforeSend: function(xhr) {
+      xhr.setRequestHeader("Authorization", $("#tokenId").val());
+    },
     success: function(response, status, xhr) {
       var ct = xhr.getResponseHeader("content-type") || "";
       if (ct.indexOf('html') > -1) {
@@ -107,5 +109,5 @@ $(document).on('click',"#save-pref-btn",function(){
     error: function(xhr) {
       alert("An error occured: " + xhr.status + " " + xhr.statusText);
     }
-  });*/
+  });
 });
