@@ -9,8 +9,8 @@ $(document).on('click',"[name=delete-btn]",function(){
     type: "DELETE",
     contentType: "application/json",
     data: JSON.stringify({
-      "id": $(id).val(), 
-	  "token": $("#tokenId").val()
+      "id": parseInt($(id).val()), 
+      "token": $("#tokenId").val()
     }),
     success: function(response, status, xhr) {
       var ct = xhr.getResponseHeader("content-type") || "";
