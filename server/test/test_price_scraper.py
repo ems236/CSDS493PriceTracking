@@ -4,7 +4,7 @@ import pytest
 # pytest --cov=. 
 
 def test_no_price():
-    assert price_scraper("https://www.amazon.com/Mounted-Handmade-Entryway-Bathroom-Organizer/dp/B07L99BTQK") == "NoPriceError"
+    assert price_scraper('https://www.amazon.com/Multifunctional-Hangers-Non-Slip-Non-Rusting-Organizer/dp/B07XG58HMQ') == "NoPriceError"
 
 def test_invalid_item():
     assert price_scraper("https://www.amazon.com/Hodedah-4-Shelve-Bookcase-Cherry/dp/B05XY6WZLP") == "InvalidItemError"
