@@ -299,9 +299,12 @@ def test_getItems(client):
     debugDal = TrackingItemDAL(True)
     debugDal.createItem(TEST_ITEM, TEST_EMAIL)
     #IC-1
+    #also test headers
+    headers = {'Authorization': 'bearer 1'}
     res = client.get("/dashboard/list", 
                     data=json.dumps(TOKEN_DICT),
-                    content_type='application/json')
+                    content_type='application/json',
+                    headers=headers)
     
     assert res.status_code == 200
     assert res.json is not None and "items" in res.json and len(res.json["items"]) == 1
