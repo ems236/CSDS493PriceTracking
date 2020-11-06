@@ -10,7 +10,8 @@ from server.webapp import app
 def getAuthToken(request):
     auth_header = request.headers.get('Authorization')
     if auth_header:
-        return auth_header.split(" ")[1]
+        #last item, sometimes the auth type isn't set and it's just a token
+        return auth_header.split(" ")[-1]
     else:
         return None
 
