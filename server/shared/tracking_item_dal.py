@@ -404,4 +404,17 @@ class TrackingItemDAL:
 
         return self.run_sql(SCRAPE_SQL, SCRAPE_PARAMS, cursor_read_scrape_tuples)
 
+
+    def urlForItemId(self, id):
+        URL_SQL = """
+        SELECT i.url
+        FROM trackingitem i
+        WHERE i.id = %(id)s
+        """
+
+        URL_PARAMS = {
+            "id": id
+        }
+
+        return self.run_sql(URL_SQL, URL_PARAMS, cursor_readscalar_if_exists)
      

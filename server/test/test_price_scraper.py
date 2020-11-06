@@ -1,4 +1,4 @@
-from .price_scraper import price_scraper
+from server.shared.price_scraper import price_scraper
 import pytest
 
 # pytest --cov=. 

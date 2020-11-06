@@ -6,6 +6,9 @@ from decimal import Decimal
 from server.webapp import app
 from server.shared.tracking_item_dal import TrackingItemDAL
 
+from server.shared.tracking_item import TrackingItem
+from server.shared.similar_item import SimilarItem
+
 @pytest.fixture
 def api():
     app.config["IS_TEST"] = True
@@ -269,3 +272,81 @@ def test_hideSimilar(client):
                     data=json.dumps(deleteItem),
                     content_type='application/json')
     checkStatus(res, True)
+
+
+TEST_ITEM = TrackingItem.fromDBRecord(1, "https://www.amazon.com/gp/product/B01D9OS5KA", "imgurl", "myitem", Decimal('1.25'), datetime.now(), TrackingItem.SAMPLE_DAY)
+TEST_EMAIL = "ems236@case.edu"
+TEST_SIMILAR_ITEM = SimilarItem(1, "testurl1", 1, "simboi", "ay.jpg", 0.0)
+TOKEN_DICT = {"token": 1}
+#IC-1, 2
+def test_getItems(client):
+    res = client.get("/dashboard/list", 
+                    data=json.dumps(TOKEN_DICT),
+                    content_type='application/json')
+    
+    assert res.status_code == 200
+    assert res.json is not None and "items" in res.json and len(res.json["items"]) == 0
+
+    #test noauth because we said we would
+    #IC-2
+    res = client.get("/dashboard/list", 
+                    data=json.dumps({"nottoken": 1}),
+                    content_type='application/json')
+    
+    assert res.status_code == 403
+
+
+    debugDal = TrackingItemDAL(True)
+    debugDal.createItem(TEST_ITEM, TEST_EMAIL)
+    #IC-1
+    res = client.get("/dashboard/list", 
+                    data=json.dumps(TOKEN_DICT),
+                    content_type='application/json')
+    
+    assert res.status_code == 200
+    assert res.json is not None and "items" in res.json and len(res.json["items"]) == 1
+
+
+#IC-3
+def test_getSimilar(client):
+    res = client.get("/dashboard/similaritems", 
+                    data=json.dumps(TOKEN_DICT),
+                    content_type='application/json')
+
+    assert res.status_code == 422
+
+    SIMILAR_REQ = {
+        "token": 1,
+        "itemId": 0
+    }
+
+    res = client.get("/dashboard/similaritems", 
+                    data=json.dumps(SIMILAR_REQ),
+                    content_type='application/json')
+
+    assert res.status_code == 422
+
+
+    SIMILAR_REQ = {
+        "token": 1,
+        "itemId": 1
+    }
+    res = client.get("/dashboard/similaritems", 
+                    data=json.dumps(SIMILAR_REQ),
+                    content_type='application/json')
+
+    assert res.status_code == 200
+    assert res.json is not None and "items" in res.json and len(res.json["items"]) == 0
+
+    debugDal = TrackingItemDAL(True)
+    debugDal.createItem(TEST_ITEM, TEST_EMAIL)
+    debugDal.registerSimilar(TEST_SIMILAR_ITEM)
+
+    res = client.get("/dashboard/similaritems", 
+                    data=json.dumps(SIMILAR_REQ),
+                    content_type='application/json')
+
+    assert res.status_code == 200
+    assert res.json is not None and "items" in res.json and len(res.json["items"]) > 1
+
+

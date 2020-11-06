@@ -62,6 +62,17 @@ def test_similar_from_dict():
     testItem = SimilarItem.fromDict(VALID_SIMILAR_ITEM)
     assert testItem is None
 
+def test_todict():
+    x = TrackingItem.fromDBRecord(1, "testurl", "imgurl", "myitem", Decimal('1.25'), datetime.now(), TrackingItem.SAMPLE_DAY)
+    y = SimilarItem(1, "a", 1, "none", "b", 0.0)
+    z = LoggedPrice(datetime.now(), Decimal('1'), Decimal('2'))
+
+    x.priceHistory.append(z)
+
+    xDict = x.toDict()
+    y.toDict()
+
+    assert len(xDict["priceHistory"]) == 1
 
 INITIAL_USERS = [
         {"user":"ems236@case.edu"}
@@ -203,8 +214,7 @@ def test_many_item(debugDal):
     assert items[1] == TEST_ITEM2
     assert items[2] == TEST_ITEM3
 
-#TODO DAL-8 is missing
-#DAL-7,9
+#DAL-7,8,9
 def test_log_price(debugDal):
     wipeDB(debugDal)
     test_email = INITIAL_USERS[0]["user"]
@@ -297,7 +307,6 @@ SIMILAR2 = SimilarItem(2, "testurl2", 1, "simboi2", "ayy.jpg", 0.0)
 SIMILAR3 = SimilarItem(3, "testurl3", 1, "simboi3", "ayyy.jpg", 0.0)
 SIMILAR4 = SimilarItem(4, "testurl4", 2, "simboi4", "ayyyy.jpg", 0.0)
 
-#TODO 25
 #DAL-20,21,22,23,24,25
 def test_similar_items(debugDal):
     wipeDB(debugDal)
@@ -389,3 +398,15 @@ def test_scrape_items(debugDal):
     #DAL-28
     items = debugDal.itemsToScrape(datetime(2020, 10, 25, 1, 0))
     assert len(items) == 1
+
+
+def test_url_for_id(debugDal):
+    wipeDB(debugDal)
+    test_email1 = INITIAL_USERS[0]["user"]
+    debugDal.createItem(TEST_ITEM, test_email1)
+
+    url = debugDal.urlForItemId(1)
+    assert url == TEST_ITEM.url
+
+    url = debugDal.urlForItemId(100)
+    assert url is None

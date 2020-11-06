@@ -3,8 +3,11 @@ from server.webapp import app
 
 from server.shared.tracking_item import TrackingItem
 from server.shared.similar_item import SimilarItem
+from server.shared.logged_price import LoggedPrice
 from server.shared.tracking_item_dal import TrackingItemDAL
+from server.shared.related_item_scraper import related_item_scraper
 from server.webapp.oauthManager import idForToken
+
 GET = 'GET'
 POST = 'POST'
 PUT = 'PUT'
@@ -138,4 +141,47 @@ def user_set_prime():
         abort(422)
     
     return makeSuccessResponse(TrackingItemDAL.updateUserPrime, user, isPrime)
+
+
+
+@app.route('/dashboard/list', methods=[GET])
+def dashboard_items():
+    user = idForToken(request)
+    items = runQuery(TrackingItemDAL.userItems, user)
+
+    respData = {"items": []} 
+    for item in items:
+        respData["items"].append(item.toDict())
+
+    return jsonify(respData)
+
+
+@app.route('/dashboard/similaritems', methods=[GET])
+def dashboard_similar():
+    user = idForToken(request) 
+    if request.json is None or "itemId" not in request.json:
+        abort(422)
+
+    itemId = request.json["itemId"]
+    if not isinstance(itemId, int) or itemId <= 0:
+        abort(422) 
+
+    items = runQuery(TrackingItemDAL.similarItems, user, itemId)
     
+    respData = {"items": []} 
+    for item in items:
+        respData["items"].append(item.toDict())
+
+    try:
+        itemUrl = runQuery(TrackingItemDAL.urlForItemId, itemId)
+        if itemUrl is not None:
+            #TODO do you need to add an https prefix or anything? depends on what front end puts in
+            scrapedItems = related_item_scraper(itemUrl)
+            for item in scrapedItems:
+                item.referrerItemId = itemId
+                respData["items"].append(item.toDict())
+
+    except Exception:
+        pass
+
+    return jsonify(respData)
