@@ -34,7 +34,15 @@ chrome.runtime.sendMessage({
           //console.log(prodList.items[0].id);
           //prodList = response;
 		  for (let i = 0; i < prodList.items.length; i++){
-			  addItem(i+1, "$23.99", prodList.items[i].url, prodList.items[i].imgUrl, prodList.items[i].title, prodList.items[i].priceThreshold, prodList.items[i].id, prodList.items[i].timeThreshold);
+			  addItem(i+1, 
+			          "$23.99", 
+					  prodList.items[i].url, 
+					  prodList.items[i].imgUrl, 
+					  prodList.items[i].title, 
+					  prodList.items[i].priceThreshold, 
+					  prodList.items[i].id, 
+					  prodList.items[i].timeThreshold, 
+					  prodList.items[i].sampleFrequency);
 		  }
           
         }
@@ -282,7 +290,7 @@ chrome.runtime.sendMessage({
     }
 
     // Add item information to the cards
-    function addItem(i, price, url, imgUrl, prodTitle, priceThreshold, prodId, timeThreshold) {
+    function addItem(i, price, url, imgUrl, prodTitle, priceThreshold, prodId, timeThreshold, sampleFreq) {
       var title = 'card-link-title-' + i;
       var img = 'img-card' + i;
       var currentPrice = "#current-price-card" + i;
@@ -290,6 +298,7 @@ chrome.runtime.sendMessage({
       var name = 'card-title' + i;
 	  var pthres = "#pthres-" + i;
 	  var tthres = "#tthres-" + i;
+	  var rate = "#rate-" + i;
 	  var id = "#itemId-" + i; 
 	  
 	  // Handle date format
@@ -302,6 +311,7 @@ chrome.runtime.sendMessage({
       $(currentPrice).text(price);
 	  $(pthres).attr('value', "$" + priceThreshold);
 	  $(tthres).attr('value', formattedDate);
+	  $(rate).val(sampleFreq);
       //$(historyPrice).text("$" + prodList.items[i-1].priceThreshold);
 	  $(id).val(prodId);
       document.getElementById(name).innerHTML = prodTitle;
