@@ -4,7 +4,10 @@
 
 */
 
-
+// chart colors
+var colors = ['#007bff', '#28a745', '#333333', '#c3e6cb', '#dc3545', '#6c757d'];
+var chartData = {};
+var similarProds = [];
 
 // Get token and save the value
 chrome.runtime.sendMessage({
@@ -33,53 +36,99 @@ chrome.runtime.sendMessage({
           prodList = response;
           //console.log(prodList.items[0].id);
           //prodList = response;
-		  for (let i = 0; i < prodList.items.length; i++){
-			  addItem(i+1, 
-			          "$23.99", 
-					  prodList.items[i].url, 
-					  prodList.items[i].imgUrl, 
-					  prodList.items[i].title, 
-					  prodList.items[i].priceThreshold, 
-					  prodList.items[i].id, 
-					  prodList.items[i].timeThreshold, 
-					  prodList.items[i].sampleFrequency);
-		  }
-          
+          for (let i = 0; i < prodList.items.length; i++) {
+			
+            // Filter out the current price
+            var currentPrice = "";
+            var lowestPrices = [];
+            var historyDates = [];
+            for (let j = 0; j < prodList.items[i].priceHistory.length; j++) {
+
+              // Handle date format
+              var date = new Date(prodList.items[i].priceHistory[j].date);
+              var formattedDate = (date.getMonth() + 1) + "/" + date.getDate() + "/" + date.getFullYear();
+              var currentDate = new Date();
+              var formattedCurrentDate = (currentDate.getMonth() + 1) + "/" + currentDate.getDate() + "/" + currentDate.getFullYear();
+
+              // Save the values
+              lowestPrices[j] = prodList.items[i].priceHistory[j].price;
+              historyDates[j] = formattedCurrentDate;
+              if (formattedDate.toString() === formattedCurrentDate.toString()) {
+                currentPrice = "$" + prodList.items[i].priceHistory[j].price;
+                //console.log("current price is today's price");
+              }
+
+            }
+            addItem(i + 1,
+              currentPrice,
+              prodList.items[i].url,
+              prodList.items[i].imgUrl,
+              prodList.items[i].title,
+              prodList.items[i].priceThreshold,
+              prodList.items[i].id,
+              prodList.items[i].timeThreshold,
+              prodList.items[i].sampleFrequency,
+              lowestPrices,
+              historyDates
+            );
+			
+			  // Get similar items
+              $.ajax({
+                url: "http://localhost:5000/dashboard/similaritems",
+                type: "GET",
+                beforeSend: function(xhr) {
+                  xhr.setRequestHeader("Authorization", $("#tokenId").val());
+                },
+				//contentType: "application/json",
+                data: {itemId: parseInt(prodList.items[i].id)},
+                success: function(response, status, xhr) {
+                  var ct = xhr.getResponseHeader("content-type") || "";
+                  if (ct.indexOf('json') > -1) {
+                    console.log("Similar products retrieved from the server.");
+                    console.log(response);
+					similarProds = response;
+					sortSimilar(i + 1, similarProds);
+                    }
+                  },
+                
+                error: function(xhr) {
+                  alert("An error occured: " + xhr.status + " " + xhr.statusText);
+                }
+              });
+          }
+
         }
       },
       error: function(xhr) {
         alert("An error occured: " + xhr.status + " " + xhr.statusText);
       }
     });
-	
-	// Get prime status from the server
-	$.ajax({
-    url: "http://localhost:5000/user/isprime",
-    type: "GET",
-    beforeSend: function(xhr) {
-      xhr.setRequestHeader("Authorization", $("#tokenId").val());
-    },
-    success: function(response, status, xhr) {
-      var ct = xhr.getResponseHeader("content-type") || "";
-      if (ct.indexOf('json') > -1) {
-		console.log(response);
-		if (response.isPrime) {
-			$("#isPrime").prop('checked', true);
-		} else {
-			$("#isNotPrime").prop('checked', true);
-		}
+
+    // Get prime status from the server
+    $.ajax({
+      url: "http://localhost:5000/user/isprime",
+      type: "GET",
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader("Authorization", $("#tokenId").val());
+      },
+      success: function(response, status, xhr) {
+        var ct = xhr.getResponseHeader("content-type") || "";
+        if (ct.indexOf('json') > -1) {
+          console.log(response);
+          if (response.isPrime) {
+            $("#isPrime").prop('checked', true);
+          } else {
+            $("#isNotPrime").prop('checked', true);
+          }
+        }
+      },
+      error: function(xhr) {
+        alert("An error occured: " + xhr.status + " " + xhr.statusText);
       }
-    },
-    error: function(xhr) {
-      alert("An error occured: " + xhr.status + " " + xhr.statusText);
-    }
-  });
+    });
 
 
-
-    //Randomly generates carousel item based on the amount of card items
-    var random = 3;
-    //alert("This tab has " + random + " card items.");
+    var random = 10;
 
     // Page number = number of items / 3
     var page = Math.ceil(random / 3);
@@ -89,8 +138,8 @@ chrome.runtime.sendMessage({
 
     function addCard(start, end, page) {
       for (let i = start; i <= end; i++) {
-        var card = "<div class=\"card\">";
-		card += "     <input type=\"hidden\" name=\"itemId\" id=\"itemId-" + i + "\">"
+        var card = "<div class=\"card\" name=\"card\"> ";
+        card += "     <input type=\"hidden\" name=\"itemId\" id=\"itemId-" + i + "\">"
         card += "      <a href=\"#\" id=\"card-link-title-" + i + "\" target=\"_blank\">";
         card += "         <img class=\"card-img-top\" src=\"...\" alt=\"Card image cap\" id = \"img-card" + i + "\">";
         card += "      </a>";
@@ -109,7 +158,6 @@ chrome.runtime.sendMessage({
         card += "         </p>";
         card += "         <!-- trigger modal -->";
         card += "         <a data-toggle=\"modal\" href=\"#detail-modal-" + i + "\" class=\"card-link\" id=\"card-link-footer-" + i + "\">Detail</a>";
-
         card += '         <!-- Modal for detail -->' +
           '                    <div class="modal fade" name="detail-modal" id="detail-modal-' + i + '" tabindex="-1" role="dialog" aria-labelledby="ModalTitle" aria-hidden="true">' +
           '                      <div class="modal-dialog" role="document">' +
@@ -133,7 +181,7 @@ chrome.runtime.sendMessage({
           '                                <div class="col-md-12">' +
           '                                  <div class="card">' +
           '                                    <div class="card-body">' +
-          '                                      <canvas id="chLine" height="150"></canvas>' +
+          '                                      <canvas name="chLine" id="chLine-' + i + '" height="150"></canvas>' +
           '                                    </div>' +
           '                                  </div>' +
           '                                </div>' +
@@ -145,57 +193,51 @@ chrome.runtime.sendMessage({
           '                                  <tr>' +
           '                                    <th scope="col">Date</th>' +
           '                                    <th scope="col">Item</th>' +
-          '                                    <th scope="col">Similar Item 1</th>' +
-          '                                    <th scope="col">Similar Item 2</th>' +
           '                                  </tr>' +
           '                                </thead>' +
-          '                                <tbody>' +
-          '                                  <tr>' +
-          '                                    <th scope="row">Nov-1</th>' +
-          '                                    <td>$639</td>' +
-          '                                    <td>$525</td>' +
-          '                                    <td>$799</td>' +
-          '                                  </tr>' +
-          '                                  <tr>' +
-          '                                    <th scope="row">Nov-2</th>' +
-          '                                    <td>$465</td>' +
-          '                                    <td>$786</td>' +
-          '                                    <td>$899</td>' +
-          '                                  </tr>' +
-          '                                  <tr>' +
-          '                                    <th scope="row">Nov-3</th>' +
-          '                                    <td>$493</td>' +
-          '                                    <td>$346</td>' +
-          '                                    <td>$900</td>' +
-          '                                  </tr>' +
-          '                                  <tr>' +
-          '                                    <th scope="row">Nov-4</th>' +
-          '                                    <td>$524</td>' +
-          '                                    <td>$700</td>' +
-          '                                    <td>$435</td>' +
-          '                                  </tr>' +
-          '                                  <tr>' +
-          '                                    <th scope="row">Nov-5</th>' +
-          '                                    <td>$735</td>' +
-          '                                    <td>$768</td>' +
-          '                                    <td>$589</td>' +
-          '                                  </tr>' +
-          '                                  <tr>' +
-          '                                    <th scope="row">Nov-6</th>' +
-          '                                    <td>$760</td>' +
-          '                                    <td>$542</td>' +
-          '                                    <td>$200</td>' +
-          '                                  </tr>' +
-          '                                  <tr>' +
-          '                                    <th scope="row">Nov-7</th>' +
-          '                                    <td>$674</td>' +
-          '                                    <td>$346</td>' +
-          '                                    <td>$300</td>' +
-          '                                  </tr>' +
+          '                                <tbody id= "table-' + i + '">' +
           '                                </tbody>' +
           '                              </table>' +
           '                            </div>' +
-          '                            <p>' +
+		  '                            <div id="similarItems-' + i + '" class="carousel slide" data-ride="carousel" data-interval="false">' +
+		  '                              <!-- Indicators -->' +
+		  '                              <ul class="carousel-indicators" id="carousel-indicators-similar-' + i + '">' +
+		  '                                <li data-target="#similarItems-' + i + '" data-slide-to="0" class="active"></li>' +
+		  '                              </ul>' +
+		  '                              <!-- The slideshow -->' +
+		  '                              <div class="carousel-inner" id="carousel-inner-similar-' + i + '-1">' +
+		  '                                <div class="carousel-item active">' + 
+		  '                                  <div class="card-group" id="card-group-similar' + i + '-1">' +
+		  '                                    <div class="card">' +
+		  '                                      <a href="#" id="card-link-similar-' + i + '-1" target="_blank">' +
+		  '                                        <img class="card-img-top" src="..." alt="Card image cap" id="img-card-similar' + i + '-1">' +
+		  '                                      </a>' +
+		  '                                      <div class="card-body" style="text-align:center">' +
+		  '                                        <h5 class="card-title" id="card-title-similar' + i + '-1">Card title</h5>' + 
+		  '                                        <p class="card-text">' +
+		  '                                          Current Price:' +
+		  '                                          <span class="card-price" id="current-price-card-similar' + i + '-1">' +
+		  '                                            ---' +
+		  '                                          </span>' +
+		  '                                          <button type="button" class="btn btn-primary" name="register-btn">Register</button>' +
+		  '                                      </div>' +
+		  '                                      <div class="card-footer" style="text-align:center">' +
+		  '                                        <small class="text-muted">Last updated 3 mins ago</small>' +
+		  '                                        <button type="button" class="btn btn-secondary" name="hide-btn">Hide this item</button>' +
+		  '                                      </div>' +
+		  '                                    </div>' +
+		  '                                  </div>' +
+		  '                                </div>' +
+		  '                              </div>' +
+		  '                              <!-- Left and right controls -->' +
+		  '                              <a class="carousel-control-prev" href="#similarItems-' + i + '" data-slide="prev">' +
+		  '                                <span class="carousel-control-prev-icon"></span>' +
+		  '                              </a>' +
+		  '                              <a class="carousel-control-next" href="#similarItems-' + i + '" data-slide="next">' +
+		  '                                <span class="carousel-control-next-icon"></span>' +
+		  '                              </a>' +
+		  '                            </div>' +
+          '                            <p id="p' + i + '">' +
           '                              Price Threshold:' +
           '                              <input type="text" name="pthres" id="pthres-' + i + '" value="$100" readonly="true" />' +
           '                            </p>' +
@@ -215,7 +257,7 @@ chrome.runtime.sendMessage({
           '' +
           '                          </div>' +
           '                          <div class="modal-footer">' +
-          '                            <button type="button" class="btn btn-primary" name="modifyThresButton" id="test'+i+'">Modify Threholds</button>' +
+          '                            <button type="button" class="btn btn-primary" name="modifyThresButton" id="test' + i + '">Modify Threholds</button>' +
           '                            <button type="button" class="btn btn-primary" name="saveThresButton" disabled>Save</button>' +
           '                          </div>' +
           '                        </div>' +
@@ -258,19 +300,21 @@ chrome.runtime.sendMessage({
     // first card tab add two cards
     if (random > 1 && random <= 3) {
       addCard(2, random, 1);
+	  
     } else if (random > 3) {
       addCard(2, 3, 1);
     }
-
+	
+	addSimilarCardExecution();
 
     // add more card page
     for (let j = 1; j < page; j++) {
-      $('<div class="carousel-item" id="carousel-item-' + j + '"></div>').appendTo('.carousel-inner'); // shouuld be id
-      $('<li data-target="#demo" data-slide-to="' + j + '"></li>').appendTo('.carousel-indicators'); // should be id
+      $('<div class="carousel-item" id="carousel-item-' + j + '"></div>').appendTo('.carousel-inner-item'); 
+      $('<li data-target="#demo" data-slide-to="' + j + '"></li>').appendTo('.carousel-indicators-1'); 
 
       // add respective cards
       var cardgroup = j + 1;
-      console.log(cardgroup);
+      //console.log("cardgroup: "+cardgroup);
       var carouselId = '#carousel-item-' + j;
 
       $('<div class="card-group" id="card-group-' + cardgroup + '"></div>').appendTo(carouselId);
@@ -290,31 +334,110 @@ chrome.runtime.sendMessage({
     }
 
     // Add item information to the cards
-    function addItem(i, price, url, imgUrl, prodTitle, priceThreshold, prodId, timeThreshold, sampleFreq) {
+    function addItem(i, price, url, imgUrl, prodTitle, priceThreshold, prodId, timeThreshold, sampleFreq, lowestPrice, historyDates) {
       var title = 'card-link-title-' + i;
       var img = 'img-card' + i;
       var currentPrice = "#current-price-card" + i;
-      //var historyPrice = "#lowest-price-card" + i;
+      var historyPrice = "#lowest-price-card" + i;
       var name = 'card-title' + i;
-	  var pthres = "#pthres-" + i;
-	  var tthres = "#tthres-" + i;
-	  var rate = "#rate-" + i;
-	  var id = "#itemId-" + i; 
-	  
-	  // Handle date format
-	  var date = new Date(timeThreshold);
-	  var formattedDate = (date.getMonth() + 1) + "/" + date.getDate() + "/" + date.getFullYear();
-	  
-	  // Assign values
+      var pthres = "#pthres-" + i;
+      var tthres = "#tthres-" + i;
+      var rate = "#rate-" + i;
+      var id = "#itemId-" + i;
+      var table = "#table-" + i;
+
+      // Handle date format
+      var date = new Date(timeThreshold);
+      var formattedDate = (date.getMonth() + 1) + "/" + date.getDate() + "/" + date.getFullYear();
+
+      // Assign values
       document.getElementById(title).setAttribute("href", url);
       document.getElementById(img).setAttribute("src", imgUrl);
       $(currentPrice).text(price);
-	  $(pthres).attr('value', "$" + priceThreshold);
-	  $(tthres).attr('value', formattedDate);
-	  $(rate).val(sampleFreq);
-      //$(historyPrice).text("$" + prodList.items[i-1].priceThreshold);
-	  $(id).val(prodId);
+      $(pthres).attr('value', "$" + priceThreshold);
+      $(tthres).attr('value', formattedDate);
+      $(rate).val(sampleFreq);
+      $(historyPrice).text("$" + min(lowestPrice));
+      $(id).val(prodId);
       document.getElementById(name).innerHTML = prodTitle;
+
+
+      for (let j = 0; j < historyDates.length; j++) {
+
+        // Fill in the graphs 
+        var chartData_toAdd = {};
+        if (j == 0) { // First object: initialize the object fields
+          chartData_toAdd = {
+            [i]: {
+              labels: [],
+              datasets: [{
+                  label: "Prime Prices",
+                  data: [],
+                  backgroundColor: 'transparent',
+                  borderColor: colors[0],
+                  borderWidth: 4,
+                  pointBackgroundColor: colors[0]
+                },
+                {
+                  label: "Non-Prime Prices",
+                  data: [],
+                  backgroundColor: colors[3],
+                  borderColor: colors[1],
+                  borderWidth: 4,
+                  pointBackgroundColor: colors[1]
+                }
+              ]
+            }
+          }
+        } else { // Keep the previous object information 
+          chartData_toAdd = {
+            [i]: {
+              labels: chartData[i].labels,
+              datasets: [{
+                  label: "Prime Prices",
+                  data: chartData[i].datasets[0].data,
+                  backgroundColor: 'transparent',
+                  borderColor: colors[0],
+                  borderWidth: 4,
+                  pointBackgroundColor: colors[0]
+                },
+                {
+                  label: "Non-Prime Prices",
+                  data: chartData[i].datasets[1].data,
+                  backgroundColor: colors[3],
+                  borderColor: colors[1],
+                  borderWidth: 4,
+                  pointBackgroundColor: colors[1]
+                }
+              ]
+            }
+          };
+        }
+
+        chartData_toAdd[i].labels[j] = historyDates[j];
+        chartData_toAdd[i].datasets[0].data[j] = lowestPrice[j];
+        chartData_toAdd[i].datasets[1].data[j] = lowestPrice[j];
+
+        $.extend(chartData, chartData_toAdd);
+
+        //console.log(chartData);
+
+        // Fill in the tables
+        var row = '<tr>' +
+          '  <th scope="row">' + historyDates[j] + '</th>' +
+          '  <td>' + "$" + lowestPrice[j] + '</td>' +
+          '</tr>';
+        $(table).append(row);
+      }
+
+
+    }
+
+    // Get min value from an array
+    function min(input) {
+      if (toString.call(input) !== "[object Array]")
+        return false;
+      return Math.min.apply(null, input);
     }
 
   }
