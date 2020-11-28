@@ -30,7 +30,8 @@ function triggerSort() {
 // order: 1 - descending
 //        2 - ascending
 function sortByOrder(order) {
-  $('#card-group-1 .card').sort(function(a, b) {
+	//lert($('#card-group-1 [name=card]').length);
+  $('#card-group-1 [name=card]').sort(function(a, b) {
 
     // Sort by price
     if ($("#sort-order").val() == "1") {
@@ -56,7 +57,13 @@ function sortByOrder(order) {
     }
     // Sort by time threshold
     else if ($("#sort-order").val() == "3") {
-      // do something
+	  if (order == "1") {
+		//return new Date($(b).find("[name=tthres]").val().date) - new Date($(a).find("[name=tthres]").val().date);
+        return new Date($(b).find("[name=tthres]").val().date) > new Date($(a).find("[name=tthres]").val().date) ? 1 : -1;
+      } else {
+        return new Date($(a).find("[name=tthres]").val().date) > new Date($(b).find("[name=tthres]").val().date) ? 1 : -1;
+      }
+      
     }
   }).appendTo("#card-group-1");
 }
