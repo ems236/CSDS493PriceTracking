@@ -47,7 +47,15 @@ chrome.runtime.onMessage.addListener(
 	
 	// Handle products unavailable to be shipped
 	var shipping = "";
-	var normalProduct = document.getElementById('exports_desktop_qualifiedBuybox_tlc_feature_div').getElementsByClassName('a-size-base a-color-secondary');
+	
+	// Location issue
+	var normalProduct = "";
+	if ($('#exports_desktop_qualifiedBuybox_atc_feature_div').length) {
+          normalProduct = document.getElementById('exports_desktop_qualifiedBuybox_tlc_feature_div').getElementsByClassName('a-size-base a-color-secondary');
+        } else {
+	  normalProduct = document.getElementById('priceInsideBuyBox_feature_div').innerHTML;
+	}		
+	
 	if (normalProduct.length != 0) {
 		shipping = normalProduct[0].innerHTML;
 	} else {
