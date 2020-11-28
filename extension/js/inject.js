@@ -16,6 +16,14 @@ chrome.runtime.sendMessage({
       if ($('#exports_desktop_qualifiedBuybox_atc_feature_div').length) {
         $("#exports_desktop_qualifiedBuybox_atc_feature_div").before(data);
         console.log('Price track button injected.');
+      } 
+      // Default location in us
+      else if ($('#addToCart_feature_div').length) {
+        $("#addToCart_feature_div").before(data);
+        console.log('Price track button injected.');
+      } 
+      else {
+        console.log('Price track button not injected.');
       }
     });
   }
