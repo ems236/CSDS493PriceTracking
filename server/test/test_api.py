@@ -324,9 +324,11 @@ def test_getSimilar(client):
         "itemId": 0
     }
 
+    headers = {'Authorization': 'bearer 1'}
+
     res = client.get("/dashboard/similaritems", 
-                    data=json.dumps(SIMILAR_REQ),
-                    content_type='application/json')
+                    query_string=SIMILAR_REQ,
+                    headers = headers)
 
     assert res.status_code == 422
 
@@ -336,8 +338,8 @@ def test_getSimilar(client):
         "itemId": 1
     }
     res = client.get("/dashboard/similaritems", 
-                    data=json.dumps(SIMILAR_REQ),
-                    content_type='application/json')
+                    query_string=SIMILAR_REQ,
+                    headers = headers)
 
     assert res.status_code == 200
     assert res.json is not None and "items" in res.json and len(res.json["items"]) == 0
@@ -347,8 +349,8 @@ def test_getSimilar(client):
     debugDal.registerSimilar(TEST_SIMILAR_ITEM)
 
     res = client.get("/dashboard/similaritems", 
-                    data=json.dumps(SIMILAR_REQ),
-                    content_type='application/json')
+                    query_string=SIMILAR_REQ,
+                    headers = headers)
 
     assert res.status_code == 200
     assert res.json is not None and "items" in res.json and len(res.json["items"]) > 1

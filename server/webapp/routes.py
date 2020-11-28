@@ -159,12 +159,14 @@ def dashboard_items():
 @app.route('/dashboard/similaritems', methods=[GET])
 def dashboard_similar():
     user = idForToken(request) 
-    if request.json is None or "itemId" not in request.json:
+    if "itemId" not in request.args:
         abort(422)
 
-    itemId = request.json["itemId"]
-    if not isinstance(itemId, int) or itemId <= 0:
+    itemId = request.args["itemId"]
+    if not str.isdigit(itemId) or int(itemId) <= 0:
         abort(422) 
+
+    itemId = int(itemId)
 
     items = runQuery(TrackingItemDAL.similarItems, user, itemId)
     
