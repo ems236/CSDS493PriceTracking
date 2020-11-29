@@ -131,3 +131,14 @@ $(document).on('click',"[name=toggler]",function(){
 	//alert("clicked on radio button");
 } );
 
+// Radio button group for similar items toggle display
+
+$(document).on('click',"[name=similar]",function(){
+	var root = $(this).closest("div .modal").attr('id');
+	var cardIdx = root.replace("detail-modal-", "");
+	//console.log(cardIdx);
+    $('[name=similar_items]').hide();
+    var cardgroup = "#card-group-similar" + cardIdx + "-" + $(this).val();
+	console.log(cardgroup);
+    $(cardgroup).show('slow');
+} );
