@@ -32,100 +32,81 @@ function addSimilarCard(start, end, page, cardIdx) {
     card += "      </div>";
     card += "   </div>";
 
-    //console.log(card);
-
     var group = '#card-group-similar' + cardIdx + '-' + page;
-	//console.log(group);
+    //console.log(group);
     $(card).appendTo(group);
-	
+
   };
 }
 
 
 // add more card page
-function addSimilarCardExecution(){
-for (let cardIdx = 1; cardIdx < 4; cardIdx++) {
-	//console.log("generate-similar.js");
-  addSimilarCard(2, 3, 1, cardIdx);
-  for (let j = 1; j < 3; j++) {
-    $('<div class="carousel-item" id="carousel-item-similar' + cardIdx + '-' + j + '"></div>').appendTo('#carousel-inner-similar-' + cardIdx + '-1' );
-    $('<li data-target="#similarItems-' + cardIdx + '" data-slide-to="' + j + '"></li>').appendTo('#carousel-indicators-similar-' + cardIdx);
+function addSimilarCardExecution() {
+  for (let cardIdx = 1; cardIdx < 4; cardIdx++) {
+    addSimilarCard(2, 3, 1, cardIdx);
+    for (let j = 1; j < 3; j++) {
+      //$('<div class="carousel-item" id="carousel-item-similar' + cardIdx + '-' + j + '"></div>').appendTo('#carousel-inner-similar-' + cardIdx + '-1');
+      //$('<li data-target="#similarItems-' + cardIdx + '" data-slide-to="' + j + '"></li>').appendTo('#carousel-indicators-similar-' + cardIdx);
 
-    // add respective cards
-    var cardgroup = j + 1;
+      // add respective cards
+      var cardgroup = j + 1;
+	  var appendLocation = "#p" + cardIdx;
 
-    var carouselId = '#carousel-item-similar' + cardIdx + '-' + j;
-    //console.log(carouselId);
-
-    $('<div class="card-group" id="card-group-similar' + cardIdx + '-' + cardgroup + '"></div>').appendTo(carouselId);
-
-    
-    if (cardsLeftover > 3) {
-      var toAdd = cardsLeftover - 3;
-
-      if (toAdd >= 3) {
-        addSimilarCard(1 + 3 * j, 3 + 3 * j, cardgroup, cardIdx);
-      } else {
-        addSimilarCard(1 + 3 * j, toAdd + 3 * j, cardgroup, cardIdx);
-      }
-      cardsLeftover = cardsLeftover - 3;
-    }
+      $(appendLocation).before('<div class="card-group"  name="similar_items" id="card-group-similar' + cardIdx + '-' + cardgroup + '" style="display: none;"></div>');
+      addSimilarCard(1 + 3 * j, 3 + 3 * j, cardgroup, cardIdx);
+	}
   }
-  cardsLeftover = 9;
-}
 }
 
-function sortSimilar(cardIdx, similarItems){
-	console.log(cardIdx);
-	// Define a holder for items
-	var price = [];
-	var itemUrl = [];
-	var imgUrl = [];
-	var name = [];
-	
-	// Default sort similar items
-    var idx = [];
-    for (var i = 0; i < similarItems.items.length; i++) {
-      idx.push(i);
-	  price[i] = similarItems.items[i].price;
-	  itemUrl[i] = similarItems.items[i].itemUrl;
-	  imgUrl[i] = similarItems.items[i].imgUrl;
-	  name[i] = similarItems.items[i].name;
-    }
-	
-    var comparator = function(arr) {
-      return function(a, b) {
-        var priceA = arr[a];
-        var priceB = arr[b];
-        priceA = parseFloat(priceA);
-        priceB = parseFloat(priceB);
-        return priceB > priceA ? 1 : -1;
-      };
+function sortSimilar(cardIdx, similarItems) {
+  //console.log(cardIdx);
+  // Define a holder for items
+  var price = [];
+  var itemUrl = [];
+  var imgUrl = [];
+  var name = [];
+
+  // Default sort similar items
+  var idx = [];
+  for (var i = 0; i < similarItems.items.length; i++) {
+    idx.push(i);
+    price[i] = similarItems.items[i].price;
+    itemUrl[i] = similarItems.items[i].itemUrl;
+    imgUrl[i] = similarItems.items[i].imgUrl;
+    name[i] = similarItems.items[i].name;
+  }
+
+  var comparator = function(arr) {
+    return function(a, b) {
+      var priceA = arr[a];
+      var priceB = arr[b];
+      priceA = parseFloat(priceA);
+      priceB = parseFloat(priceB);
+      return priceB > priceA ? 1 : -1;
     };
-    idx = idx.sort(comparator(price));
-	//console.log(idx);
-    //console.log(price);
+  };
+  idx = idx.sort(comparator(price));
+  //console.log(idx);
+  //console.log(price);
 
-    var displayLength = price.length;
-    
-    for (let j = 0; j < displayLength; j++) {
-      addSimilarItem(j, price[idx[j]], itemUrl[idx[j]], imgUrl[idx[j]], name[idx[j]], cardIdx);
-    }
+  var displayLength = price.length;
 
+  for (let j = 0; j < displayLength; j++) {
+    addSimilarItem(j, price[idx[j]], itemUrl[idx[j]], imgUrl[idx[j]], name[idx[j]], cardIdx);
   }
-  
-  // Display similar items of a certain product
-  function addSimilarItem(i, price, url, imgUrl, prodName, cardIdx) {
-	  i += 1;
-      var title = '#card-link-similar-' + cardIdx + "-" + i;
-      var img = '#img-card-similar' + cardIdx + "-" + i;
-      var currentPrice = "#current-price-card-similar" + cardIdx + "-"  + i;
-      var name = '#card-title-similar' + cardIdx + "-"  + i;
-	  
-	  $(title).attr("href", url);
-      $(img).attr("src", imgUrl);
-      $(currentPrice).text(price);
-      $(name).html(prodName);
-    }
 
+}
 
+// Display similar items of a certain product
+function addSimilarItem(i, price, url, imgUrl, prodName, cardIdx) {
+  i += 1;
+  var title = '#card-link-similar-' + cardIdx + "-" + i;
+  var img = '#img-card-similar' + cardIdx + "-" + i;
+  var currentPrice = "#current-price-card-similar" + cardIdx + "-" + i;
+  var name = '#card-title-similar' + cardIdx + "-" + i;
+
+  $(title).attr("href", url);
+  $(img).attr("src", imgUrl);
+  $(currentPrice).text("$" + price);
+  $(name).html(prodName);
+}
