@@ -69,7 +69,7 @@ $("[name=register-btn]").on("click", function() {
     error: function(xhr) {
       alert("An error occured: " + xhr.status + " " + xhr.statusText);
     }
-  });*/
+  });
 });
 
 $("[name=hide-btn]").on("click", function() {
