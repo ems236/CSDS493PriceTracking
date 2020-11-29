@@ -34,10 +34,16 @@ $("[name=register-btn]").on("click", function() {
   var name = root.find(".card-title").text();
   var price = root.find(".card-price").text();
   var price = price.substr(1, price.length);
+  
+  var referrerRoot = $(this).closest("div .modal").attr('id');
+  var cardIdx = referrerRoot.replace("detail-modal-", "");
+  var referrerItemId = $("#itemId-" + cardIdx).val();
+  //console.log("ReferrerId: "+referrerItemId);
   //console.log(root.find("a").attr("href"));
   //console.log(root.find("img").attr("src"));
   //console.log(root.find(".card-title").text());
   //console.log(root.find(".card-price").text());
+  
   
   $.ajax({
     url: "http://localhost:5000/similar/register",
@@ -47,7 +53,7 @@ $("[name=register-btn]").on("click", function() {
       "itemUrl": itemUrl,
       "imgUrl": imgUrl,
       "name": name,
-      "referrerItemId": parseInt($("#itemId-1").val()),
+      "referrerItemId": parseInt(referrerItemId),
       "price": price,
 	  "token": $("#tokenId").val()
     }),
@@ -63,7 +69,7 @@ $("[name=register-btn]").on("click", function() {
     error: function(xhr) {
       alert("An error occured: " + xhr.status + " " + xhr.statusText);
     }
-  });
+  });*/
 });
 
 $("[name=hide-btn]").on("click", function() {
