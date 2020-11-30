@@ -1,4 +1,4 @@
-chrome.alarms.create("notificationAlarm", {periodInMinutes: 0.1});
+chrome.alarms.create("notificationAlarm", {periodInMinutes: 1});
 console.log("alarm set");
 
 
