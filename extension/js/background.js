@@ -77,3 +77,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       }]);
     });
   });
+
+
+  // Listen for notification messages 
+  chrome.runtime.onMessage.addListener(data => {
+    if (data.type === 'notification') {
+      var notification = chrome.notifications
+      notification.create('', data.options);
+    }
+  });
