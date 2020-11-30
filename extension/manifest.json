@@ -2,7 +2,7 @@
     "name": "Online Price Tracker",
     "version": "1.0",
     "description": "Online price tracking extension for Amazon products.",
-    "permissions": ["activeTab", "declarativeContent", "storage", "https://www.amazon.com/*", "identity", "alarms"],
+    "permissions": ["activeTab", "declarativeContent", "storage", "https://www.amazon.com/*", "identity", "alarms", "notifications"],
     "oauth2": {
       "client_id": "421234127272-3bb34j7akcuuklsafvc6cuv757jd0870.apps.googleusercontent.com",
       "scopes": [
