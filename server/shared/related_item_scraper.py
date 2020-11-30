@@ -21,7 +21,7 @@ def related_item_scraper(url):
     html = html_contents.decode("utf-8")
     
     # Store information about each related item into items[]
-    section = re.search('SponsoredProductsSimsDpDesktop(.*)SponsoredProductsViewability', html).group()
+    section = re.search('SponsoredProductsSimsDpDesktop(.*)', html).group()
     items = re.split('a-carousel-card+', section)    # index 0 is before carousel info
     
     # Only return a max of 10 related items
