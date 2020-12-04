@@ -10,7 +10,7 @@ $(document).on('click',"[name=delete-btn]",function(){
     contentType: "application/json",
     data: JSON.stringify({
       "id": parseInt($(id).val()), 
-      "token": $("#tokenId").val()
+	  "token": $("#tokenId").val()
     }),
     success: function(response, status, xhr) {
       var ct = xhr.getResponseHeader("content-type") || "";
@@ -26,7 +26,6 @@ $(document).on('click',"[name=delete-btn]",function(){
 });
 
 // Click on register button (similar product)
-// TODO: handle referrerItemId
 $("[name=register-btn]").on("click", function() {
   var root = $(this).closest("div .card")
   var itemUrl = root.find("a").attr("href");
@@ -35,10 +34,16 @@ $("[name=register-btn]").on("click", function() {
   var name = root.find(".card-title").text();
   var price = root.find(".card-price").text();
   var price = price.substr(1, price.length);
+  
+  var referrerRoot = $(this).closest("div .modal").attr('id');
+  var cardIdx = referrerRoot.replace("detail-modal-", "");
+  var referrerItemId = $("#itemId-" + cardIdx).val();
+  //console.log("ReferrerId: "+referrerItemId);
   //console.log(root.find("a").attr("href"));
   //console.log(root.find("img").attr("src"));
   //console.log(root.find(".card-title").text());
   //console.log(root.find(".card-price").text());
+  
   
   $.ajax({
     url: "http://localhost:5000/similar/register",
@@ -48,7 +53,7 @@ $("[name=register-btn]").on("click", function() {
       "itemUrl": itemUrl,
       "imgUrl": imgUrl,
       "name": name,
-      "referrerItemId": parseInt($("#itemId-1").val()),
+      "referrerItemId": parseInt(referrerItemId),
       "price": price,
 	  "token": $("#tokenId").val()
     }),
@@ -68,9 +73,10 @@ $("[name=register-btn]").on("click", function() {
 });
 
 $("[name=hide-btn]").on("click", function() {
+  var root = $(this).closest("div .card");
   
-
-  /*$.ajax({
+  /*
+  $.ajax({
     url: "http://localhost:5000/similar/hide",
     type: "POST",
     contentType: "application/json",
@@ -91,76 +97,54 @@ $("[name=hide-btn]").on("click", function() {
   $(this).closest(".card").remove();
 });
 
-// chart colors
-var colors = ['#007bff', '#28a745', '#333333', '#c3e6cb', '#dc3545', '#6c757d'];
-
-/* large line chart */
-var chLine = document.getElementById("chLine");
-var chartData = {
-  labels: ["Nov-1", "Nov-2", "Nov-3", "Nov-4", "Nov-5", "Nov-6", "Nov-7"],
-  datasets: [{
-      label: "Prime Prices",
-      data: [589, 445, 483, 503, 689, 692, 634],
-      backgroundColor: 'transparent',
-      borderColor: colors[0],
-      borderWidth: 4,
-      pointBackgroundColor: colors[0]
-    },
-    {
-      label: "Non-Prime Prices",
-      data: [639, 465, 493, 524, 735, 760, 674],
-      backgroundColor: colors[3],
-      borderColor: colors[1],
-      borderWidth: 4,
-      pointBackgroundColor: colors[1]
-    },
-    {
-      label: "Similar Item 1",
-      data: [525, 786, 346, 700, 768, 542, 346],
-      backgroundColor: 'transparent',
-      borderColor: colors[2],
-      borderWidth: 4,
-      pointBackgroundColor: colors[2]
-    },
-    {
-      label: "Similar Item 2",
-      data: [799, 899, 900, 435, 589, 200, 300],
-      backgroundColor: 'transparent',
-      borderColor: colors[4],
-      borderWidth: 4,
-      pointBackgroundColor: colors[4]
-    }
-  ]
-};
-
-if (chLine) {
-  new Chart(chLine, {
-    type: 'line',
-    data: chartData,
-    options: {
-      scales: {
-        yAxes: [{
-          ticks: {
-            beginAtZero: false
-          },
-          scaleLabel: {
-            display: true,
-            labelString: 'In $'
-          },
-        }]
-      },
-      legend: {
-        display: true
-      }
-    }
-  });
-}
 
 // Radio button group for view graph / table
 
 $(document).on('click',"[name=toggler]",function(){
     $('.toHide').hide();
     $("[name=blk-" + $(this).val() + "]").show('slow');
+	
+	// Display a line chart
+	var root = $(this).parent().parent();
+	var chLine = root.find("canvas").attr('id');
+	//console.log("Which is clicked? " + chLine);
+    //var chLine = document.getElementsByName("chLine");
+	console.log(chartData);
+    if (chLine) {
+	  var i = parseInt(chLine.substr(chLine.indexOf("-") + 1, chLine.length));
+      new Chart(chLine, {
+        type: 'line',
+        data: chartData[i],
+        options: {
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero: false
+              },
+              scaleLabel: {
+                display: true,
+                labelString: 'In $'
+              },
+            }]
+          },
+          legend: {
+            display: true
+          }
+        }
+      });
+    }
+	
 	//alert("clicked on radio button");
 } );
 
+// Radio button group for similar items toggle display
+
+$(document).on('click',"[name=similar]",function(){
+	var root = $(this).closest("div .modal").attr('id');
+	var cardIdx = root.replace("detail-modal-", "");
+	//console.log(cardIdx);
+    $('[name=similar_items]').hide();
+    var cardgroup = "#card-group-similar" + cardIdx + "-" + $(this).val();
+	console.log(cardgroup);
+    $(cardgroup).show('slow');
+} );
