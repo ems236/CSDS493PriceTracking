@@ -35,10 +35,9 @@ console.log(url);
 
 console.log("adding listener")
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log("got message");
-  if (request.message === 'login') {
-    chrome.identity.launchWebAuthFlow(
+function lookupToken(onsuccess, onfail)
+{
+  chrome.identity.launchWebAuthFlow(
     {
         'url': url, 
         'interactive':true
@@ -47,17 +46,30 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         console.log(redirect_url);
         if (chrome.runtime.lastError) {
             console.log(chrome.runtime.lastError.message);
-            sendResponse({"success": false})
+            onfail()
         }
         else {
             let id_token = redirect_url.substring(redirect_url.indexOf('id_token=') + 9);
             id_token = id_token.substring(0, id_token.indexOf('&'));
             console.log(id_token);
-            sendResponse({"success": true, "token": id_token});
+            onsuccess(id_token)
             console.log(redirect_url);
         }
     }
   );
+}
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  console.log("got message");
+  if (request.message === 'login') {
+    lookupToken(
+    function(id_token){
+      sendResponse({"success": true, "token": id_token});
+    },
+    function()
+    {
+      sendResponse({"success": false});
+    });
 
     return true;
   }

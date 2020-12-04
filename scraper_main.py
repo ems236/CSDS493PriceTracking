@@ -7,17 +7,17 @@ from decimal import Decimal
 
 class ScraperTask():
     def __init__(self):
-        self.dal = TrackingItemDAL(True)
+        self.dal = TrackingItemDAL()
     
     def scrape_all_prices(self):
         toScrape = self.dal.itemsToScrape()
         for item in toScrape:
-            self.scrape_price(item)
+            self.scrape_price(item[0], item[1])
 
-    def scrape_price(self, item : TrackingItem):
+    def scrape_price(self, itemid: int, itemUrl: str):
         try:
-            price = price_scraper(item.url)
-            self.dal.logPrice(item.id, Decimal(price), Decimal(price))
+            price = price_scraper(itemUrl)
+            self.dal.logPrice(itemid, Decimal(price), Decimal(price))
         except: 
             pass
         

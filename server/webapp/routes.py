@@ -183,7 +183,7 @@ def dashboard_similar():
                 item.referrerItemId = itemId
                 respData["items"].append(item.toDict())
 
-    except Exception:
-        pass
+    except Exception as e:
+        print(e)
 
     return jsonify(respData)
